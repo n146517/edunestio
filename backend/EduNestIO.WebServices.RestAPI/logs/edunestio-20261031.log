@@ -1,0 +1,17 @@
+2026-10-31T04:53:15.084Z [Detail] AuthBL.Login Start - riverdale.admin
+2026-10-31T04:53:15.144Z [Detail] AuthBL.Login End - 
+2026-10-31T06:24:27.500Z [Detail] DevSeedBL.SeedDemoUsers  Demo users seeded.
+2026-10-31T06:26:05.141Z [Detail] AuthBL.Login Start - riverdale.admin
+2026-10-31T06:26:05.267Z [Detail] AuthBL.Login End - 
+2026-10-31T06:45:27.859Z [Detail] DevSeedBL.SeedDemoUsers  Demo users seeded.
+2026-10-31T06:46:24.656Z [Detail] AuthBL.Login Start - riverdale.admin
+2026-10-31T06:46:24.776Z [Detail] AuthBL.Login End - 
+2026-10-31T08:25:58.666Z [Detail] DevSeedBL.SeedDemoUsers  Demo users seeded.
+2026-10-31T08:26:54.184Z [Detail] AuthBL.Login Start - riverdale.student
+2026-10-31T08:26:54.312Z [Detail] AuthBL.Login End - 
+2026-10-31T08:42:09.702Z [Detail] AuthBL.Login Start - riverdale.admin
+2026-10-31T08:42:09.767Z [Detail] AuthBL.Login End - 
+2026-10-31T09:54:04.860Z [Detail] AuthBL.Login Start - riverdale.student
+2026-10-31T09:54:05.078Z [Detail] AuthBL.Login End - 
+2026-10-31T09:54:51.066Z [Detail] AuthBL.Login Start - riverdale.admin
+2026-10-31T09:54:51.098Z [Detail] AuthBL.Login End - 

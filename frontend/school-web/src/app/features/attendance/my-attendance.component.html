@@ -1,0 +1,58 @@
+<section class="page">
+  <nav class="crumbs">My Attendance</nav>
+  <header class="head">
+    <div>
+      <h1>My Attendance</h1>
+      <p class="muted">Your day-wise attendance record and overall summary.</p>
+    </div>
+    @if (years().length) {
+      <label class="yearfilter">Academic year
+        <select [(ngModel)]="yearId">
+          <option [ngValue]="0">All years</option>
+          @for (y of years(); track y.academic_year_id) {
+            <option [ngValue]="y.academic_year_id">{{ y.name }}</option>
+          }
+        </select>
+      </label>
+    }
+  </header>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'nostudent') {
+    <div class="empty"><p class="muted">This account is not linked to a student record.</p></div>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load your attendance.</p></div>
+  } @else {
+    <div class="att-cards">
+      <div class="att-card"><span>Attendance %</span><strong>{{ summary().pct }}%</strong></div>
+      <div class="att-card att-card--ok"><span>Present</span><strong>{{ summary().present }}</strong></div>
+      <div class="att-card att-card--bad"><span>Absent</span><strong>{{ summary().absent }}</strong></div>
+      <div class="att-card att-card--warn"><span>Late</span><strong>{{ summary().late }}</strong></div>
+      <div class="att-card att-card--leave"><span>Leave</span><strong>{{ summary().leave }}</strong></div>
+    </div>
+
+    <div class="card">
+      <h2>History</h2>
+      @if (!rows().length) {
+        <p class="muted">No attendance records for this academic year.</p>
+      } @else {
+        <div class="tablewrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Date</th><th>Status</th><th>Remark</th></tr></thead>
+            <tbody>
+              @for (a of rows(); track a.attend_date; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ a.attend_date | date:'EEE, dd MMM yyyy' }}</td>
+                  <td><span [class]="attendClass(a.status)">{{ a.status }}</span></td>
+                  <td>{{ a.remark ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</section>

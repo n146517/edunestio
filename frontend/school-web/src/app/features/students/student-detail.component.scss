@@ -1,0 +1,242 @@
+$green: #16a34a;
+$green-dark: #0f5132;
+$ink: #1f2a37;
+$muted: #667085;
+$line: #d7dce3;              // slightly darker border so cards read clearly
+$line-soft: #e5e7eb;
+$bg: #f8fafc;
+$shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+$shadow-lg: 0 8px 24px rgba(16, 24, 40, 0.10);
+
+:host { display: block; }
+
+.page { color: $ink; }
+
+.crumbs {
+  font-size: 0.82rem; color: $muted; margin-bottom: 0.9rem;
+  a { color: $muted; text-decoration: none; &:hover { text-decoration: underline; } }
+  span { margin: 0 0.35rem; color: #c4cad2; }
+}
+
+.muted { color: $muted; }
+.error { color: #b3261e; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem; }
+
+/* ================= Profile header ================= */
+.profile {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 1.25rem; align-items: flex-start;
+  border-radius: 18px; padding: 1.4rem 1.5rem; margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f6faf7 100%);
+  border: 1px solid $line; box-shadow: $shadow;
+  &__photo {
+    width: 108px; height: 108px; border-radius: 50%; overflow: hidden; flex: none;
+    background: linear-gradient(135deg, #bbf7d0, #86efac);
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid #fff; box-shadow: 0 0 0 1px $line, 0 6px 16px rgba(22,163,74,0.18);
+    img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-initials { font-size: 2.1rem; font-weight: 800; color: $green-dark; }
+  }
+  &__id { min-width: 0; }
+  &__name { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    h1 { margin: 0; font-size: 1.6rem; font-weight: 700; color: #111827; } }
+  &__sub { display: flex; flex-wrap: wrap; gap: 0.35rem 1.4rem; margin: 0.35rem 0 0.9rem;
+    font-size: 0.85rem; color: $muted; strong { color: #374151; } }
+  &__chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  &__actions { display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch;
+    @media (max-width: 720px) { flex-direction: row; flex-wrap: wrap; } }
+}
+
+.chip {
+  border: 1px solid #cfd6de; border-radius: 12px; padding: 0.5rem 0.8rem; min-width: 92px;
+  display: flex; flex-direction: column; gap: 0.12rem; background: #fff;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.05);
+  &__label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; color: $muted; font-weight: 600; }
+  &__value { font-size: 0.95rem; font-weight: 700; color: #111827; }
+  &__hint { font-size: 0.68rem; color: $muted; }
+  &--soft { background: $bg; }
+  &--dob { background: #f0fdf4; border-color: #a7f3d0; }
+  &--gender { background: #eff6ff; border-color: #bfdbfe; }
+  &--adm { background: #faf5ff; border-color: #e9d5ff; }
+}
+
+/* ================= Tabs ================= */
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 1.1rem 0 1.1rem;
+  background: #fff; border: 1px solid $line; border-radius: 12px; padding: 0.35rem;
+  box-shadow: $shadow;
+}
+.tab {
+  appearance: none; background: none; border: none; cursor: pointer; font: inherit;
+  padding: 0.5rem 0.9rem; color: $muted; font-size: 0.85rem; font-weight: 600;
+  border-radius: 8px; white-space: nowrap; transition: background 0.12s ease, color 0.12s ease;
+  &:hover { color: $ink; background: #f2f4f7; }
+  &--active { color: #fff; background: $green; }
+}
+
+/* ================= Grid + cards =================
+   Masonry-style columns so short cards (e.g. the photo) don't leave a big gap —
+   cards flow and pack naturally instead of locking to a rigid 2-col grid. */
+.grid {
+  column-count: 2; column-gap: 1rem;
+  @media (max-width: 900px) { column-count: 1; }
+  > .card { break-inside: avoid; margin-bottom: 1rem; }
+}
+.stack { break-inside: avoid; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.card {
+  background: #fff; border: 1px solid $line; border-radius: 14px; padding: 1.15rem 1.25rem;
+  box-shadow: $shadow; transition: box-shadow 0.15s ease, transform 0.15s ease;
+  &:hover { box-shadow: $shadow-lg; }
+  h2 { margin: 0 0 0.9rem; font-size: 1rem; font-weight: 700; color: #0f172a;
+    padding-bottom: 0.55rem; border-bottom: 1px solid $line-soft; }
+}
+/* In the masonry column flow, a wide card simply spans the available width;
+   it must not be a grid-column rule (no grid context here). */
+.card--wide { column-span: all; }
+.card__head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem;
+  padding-bottom: 0.55rem; border-bottom: 1px solid $line-soft;
+  h2 { margin: 0; padding: 0; border: none; }
+}
+
+/* key/value pairs */
+.pairs {
+  margin: 0; display: flex; flex-direction: column; gap: 0.1rem;
+  > div { display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem; font-size: 0.88rem;
+    align-items: baseline; padding: 0.4rem 0; border-bottom: 1px dashed #eef1f5; }
+  > div:last-child { border-bottom: none; }
+  dt { color: $muted; font-size: 0.82rem; } dd { margin: 0; color: #0f172a; font-weight: 600; }
+  &--2 {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2rem;
+    @media (max-width: 640px) { grid-template-columns: 1fr; }
+  }
+}
+
+/* student photo card — circular avatar, compact so it doesn't leave a big gap */
+.card--photo {
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  h2 { align-self: flex-start; }
+}
+.photo-box {
+  width: 150px; height: 150px; border-radius: 50%; overflow: hidden;
+  margin: 0.4rem auto 0.9rem; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #bbf7d0, #86efac); border: 4px solid #fff;
+  box-shadow: 0 0 0 1px $line, 0 8px 20px rgba(22,163,74,0.18);
+  img { width: 100%; height: 100%; object-fit: cover; }
+  &__initials { font-size: 2.6rem; font-weight: 800; color: $green-dark; }
+}
+.photo-box__actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+
+/* quick actions */
+.quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+.qa {
+  appearance: none; cursor: pointer; font: inherit; text-align: left;
+  border: 1px solid transparent; border-radius: 12px; padding: 0.85rem 0.9rem;
+  display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.86rem; font-weight: 600;
+  transition: transform 0.06s ease, box-shadow 0.12s ease;
+  &:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16,24,40,0.08); }
+  &__ic { font-size: 1.2rem; }
+  &--green { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+  &--amber { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+  &--blue  { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+  &--violet{ background: #faf5ff; color: #7c3aed; border-color: #e9d5ff; }
+  &--cyan  { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+}
+
+/* tables */
+.tbl {
+  width: 100%; border-collapse: collapse; font-size: 0.84rem; overflow: hidden;
+  border: 1px solid $line-soft; border-radius: 10px;
+  th, td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid #eef1f5; }
+  th { color: #475467; font-weight: 700; background: #f1f5f4; white-space: nowrap;
+    text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.03em; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #f8fbf9; }
+}
+.link-btn {
+  appearance: none; background: none; border: none; cursor: pointer; font: inherit;
+  color: #b3261e; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0;
+  &:hover { text-decoration: underline; }
+}
+
+/* ================= Badges / pills ================= */
+.badge {
+  font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: #e7ece9; color: #555;
+  font-weight: 600; display: inline-block;
+  &--active { background: #dcfce7; color: #166534; }
+  &--inactive { background: #f3f4f6; color: #6b7280; }
+  &--grad { background: #dbeafe; color: #1d4ed8; }
+  &--withdrawn { background: #fee2e2; color: #b91c1c; }
+  &--promoted { background: #e0e7ff; color: #4338ca; }
+}
+.pill {
+  font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 999px; font-weight: 600;
+  background: #f3f4f6; color: #6b7280;
+  &--pass { background: #dcfce7; color: #166534; }
+  &--fail { background: #fee2e2; color: #b91c1c; }
+}
+
+/* ================= Buttons ================= */
+.btn {
+  padding: 0.55rem 1rem; border-radius: 8px; border: 1px solid $line; background: #fff; color: $ink;
+  cursor: pointer; font: inherit; font-weight: 600; text-decoration: none; font-size: 0.85rem;
+  display: inline-flex; align-items: center; gap: 0.4rem; justify-content: center; white-space: nowrap;
+  &:hover { background: #f9fafb; }
+  &:disabled { opacity: 0.6; cursor: default; }
+  &--sm { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+  &--primary { background: $green; border-color: $green; color: #fff; &:hover { background: #15803d; } }
+  &--ghost { background: #fff; color: #374151; }
+  &--danger-outline { background: #fff; color: #dc2626; border-color: #fecaca; &:hover { background: #fef2f2; } }
+}
+
+/* ================= Modals ================= */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.45); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal {
+  background: #fff; border-radius: 14px; padding: 1.3rem 1.4rem; width: 100%; max-width: 440px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  h2 { margin: 0 0 0.8rem; font-size: 1.1rem; }
+  label { display: block; font-size: 0.85rem; color: #374151; margin-bottom: 0.8rem; font-weight: 600; }
+  input, select { width: 100%; margin-top: 0.3rem; padding: 0.5rem 0.6rem; border: 1px solid $line; border-radius: 8px; font: inherit; }
+  .req { color: #dc2626; }
+  &__actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.4rem; }
+  &--lg { max-width: 620px; }
+}
+
+/* focused section editor forms */
+.form-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 1rem; margin-bottom: 0.6rem;
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+  label { margin-bottom: 0.5rem; }
+  .span-2 { grid-column: 1 / -1; }
+}
+
+.photo-edit {
+  display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin-bottom: 0.4rem;
+  &__preview { width: 160px; height: 160px; border-radius: 50%; overflow: hidden; border: 1px solid $line;
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    display: flex; align-items: center; justify-content: center; color: $green-dark; font-weight: 600;
+    img { width: 100%; height: 100%; object-fit: cover; } }
+  &__pick { width: 100%; font-size: 0.85rem; font-weight: 600; color: #374151;
+    input { display: block; margin-top: 0.3rem; font: inherit; } }
+}
+
+/* ================= Attendance summary cards ================= */
+.att-cards {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem;
+  @media (max-width: 760px) { grid-template-columns: repeat(2, 1fr); }
+}
+.att-card {
+  background: #fff; border: 1px solid $line; border-radius: 12px; padding: 0.8rem 0.9rem;
+  span { display: block; font-size: 0.72rem; color: $muted; text-transform: uppercase; letter-spacing: 0.02em; }
+  strong { font-size: 1.5rem; color: #111827; }
+  &--ok strong { color: #166534; }
+  &--bad strong { color: #b91c1c; }
+  &--warn strong { color: #b45309; }
+  &--leave strong { color: #1d4ed8; }
+}
+
+@media print {
+  .tabs, .profile__actions, .quick, .photo-box__actions, .crumbs { display: none !important; }
+}

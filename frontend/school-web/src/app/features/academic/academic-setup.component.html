@@ -1,0 +1,102 @@
+<section class="page">
+<nav class="crumbs">Academics <span>›</span> Academic Setup</nav>
+<header class="page__head">
+  <div>
+    <h1>Academic Setup</h1>
+    <p class="muted">Define academic years, classes, sections and subjects for your school.</p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+  <button role="tab" [class.active]="tab()==='classes'" (click)="setTab('classes')">Classes</button>
+  <button role="tab" [class.active]="tab()==='sections'" (click)="setTab('sections')">Sections</button>
+  <button role="tab" [class.active]="tab()==='subjects'" (click)="setTab('subjects')">Subjects</button>
+  <button role="tab" [class.active]="tab()==='years'" (click)="setTab('years')">Academic Years</button>
+</div>
+
+<div class="card">
+@if (loading()) { <p class="muted">Loading…</p> }
+
+<!-- CLASSES -->
+@if (tab()==='classes') {
+  @if (canManage) {
+    <form class="row-form" [formGroup]="classForm" (ngSubmit)="addClass()" novalidate>
+      <input type="text" formControlName="Name" placeholder="Class name (e.g. Grade 4)" />
+      <input type="number" formControlName="Ordinal" placeholder="Order" style="width:90px" />
+      <button class="btn btn--primary" [disabled]="saving()">Add class</button>
+    </form>
+  }
+  <table class="grid">
+    <thead><tr><th>Class</th><th>Order</th><th>Sections</th><th>Active students</th></tr></thead>
+    <tbody>
+      @for (c of classes(); track c.class_id) {
+        <tr><td>{{ c.name }}</td><td>{{ c.ordinal }}</td><td>{{ c.section_count }}</td><td>{{ c.student_count }}</td></tr>
+      } @empty { <tr><td colspan="4" class="muted">No classes yet.</td></tr> }
+    </tbody>
+  </table>
+}
+
+<!-- SECTIONS -->
+@if (tab()==='sections') {
+  @if (canManage) {
+    <form class="row-form" [formGroup]="sectionForm" (ngSubmit)="addSection()" novalidate>
+      <select formControlName="ClassId">
+        <option [value]="0">Select class…</option>
+        @for (c of classes(); track c.class_id) { <option [value]="c.class_id">{{ c.name }}</option> }
+      </select>
+      <input type="text" formControlName="Name" placeholder="Section (e.g. A)" />
+      <button class="btn btn--primary" [disabled]="saving()">Add section</button>
+    </form>
+  }
+  <table class="grid">
+    <thead><tr><th>Class</th><th>Section</th></tr></thead>
+    <tbody>
+      @for (s of sections(); track s.section_id) {
+        <tr><td>{{ s.class_name }}</td><td>{{ s.name }}</td></tr>
+      } @empty { <tr><td colspan="2" class="muted">No sections yet.</td></tr> }
+    </tbody>
+  </table>
+}
+
+<!-- SUBJECTS -->
+@if (tab()==='subjects') {
+  @if (canManage) {
+    <form class="row-form" [formGroup]="subjectForm" (ngSubmit)="addSubject()" novalidate>
+      <input type="text" formControlName="Name" placeholder="Subject name" />
+      <input type="text" formControlName="Code" placeholder="Code" style="width:120px" />
+      <button class="btn btn--primary" [disabled]="saving()">Add subject</button>
+    </form>
+  }
+  <table class="grid">
+    <thead><tr><th>Subject</th><th>Code</th><th>Status</th></tr></thead>
+    <tbody>
+      @for (s of subjects(); track s.subject_id) {
+        <tr><td>{{ s.name }}</td><td>{{ s.code }}</td><td>{{ s.is_active ? 'Active' : 'Inactive' }}</td></tr>
+      } @empty { <tr><td colspan="3" class="muted">No subjects yet.</td></tr> }
+    </tbody>
+  </table>
+}
+
+<!-- ACADEMIC YEARS -->
+@if (tab()==='years') {
+  @if (canManage) {
+    <form class="row-form" [formGroup]="yearForm" (ngSubmit)="addYear()" novalidate>
+      <input type="text" formControlName="Name" placeholder="Name (e.g. 2026-2027)" />
+      <input type="date" formControlName="StartDate" />
+      <input type="date" formControlName="EndDate" />
+      <label class="chk"><input type="checkbox" formControlName="IsCurrent" /> Current</label>
+      <button class="btn btn--primary" [disabled]="saving()">Add year</button>
+    </form>
+  }
+  <table class="grid">
+    <thead><tr><th>Name</th><th>Start</th><th>End</th><th>Current</th></tr></thead>
+    <tbody>
+      @for (y of years(); track y.academic_year_id) {
+        <tr><td>{{ y.name }}</td><td>{{ y.start_date }}</td><td>{{ y.end_date }}</td><td>{{ y.is_current ? 'Yes' : '' }}</td></tr>
+      } @empty { <tr><td colspan="4" class="muted">No academic years yet.</td></tr> }
+    </tbody>
+  </table>
+}
+
+</div>
+</section>

@@ -1,0 +1,80 @@
+<div class="adm__header">
+  <h1>Admissions &amp; Enquiries</h1>
+  @if (canManage) {
+    <button type="button" class="btn btn--primary" (click)="toggleForm()">
+      {{ showForm() ? 'Close' : 'New enquiry' }}
+    </button>
+  }
+</div>
+<p class="muted">Capture enquiries, track them through the admission funnel, and convert accepted enquiries into students.</p>
+
+@if (showForm() && canManage) {
+  <form class="adm-form" [formGroup]="form" (ngSubmit)="create()" novalidate>
+    <div class="adm-form__grid">
+      <label class="field"><span>Applicant name *</span><input type="text" formControlName="ApplicantName" /></label>
+      <label class="field"><span>Guardian name</span><input type="text" formControlName="GuardianName" /></label>
+      <label class="field"><span>Phone</span><input type="text" formControlName="Phone" /></label>
+      <label class="field"><span>Email</span><input type="email" formControlName="Email" /></label>
+      <label class="field">
+        <span>Source</span>
+        <select formControlName="Source">
+          <option>Walk-in</option><option>Phone</option><option>Website</option><option>Referral</option><option>Other</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Desired class</span>
+        <select formControlName="DesiredClassId">
+          <option [value]="0">—</option>
+          @for (c of classes(); track c.class_id) { <option [value]="c.class_id">{{ c.name }}</option> }
+        </select>
+      </label>
+    </div>
+    <button type="submit" class="btn btn--primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save enquiry' }}</button>
+  </form>
+}
+
+<div class="toolbar">
+  <label>Stage:
+    <select (change)="filterStage($any($event.target).value)">
+      <option value="">All</option>
+      @for (s of stages; track s) { <option [value]="s">{{ s }}</option> }
+    </select>
+  </label>
+</div>
+
+@switch (state()) {
+  @case ('loading') { <p>Loading…</p> }
+  @case ('error') { <p class="error">Failed to load enquiries.</p><button class="btn" (click)="load()">Retry</button> }
+  @case ('success') {
+    @if (items().length === 0) {
+      <p class="muted">No enquiries found.</p>
+    } @else {
+      <table class="grid">
+        <thead><tr><th>Enquiry #</th><th>Applicant</th><th>Contact</th><th>Class</th><th>Stage</th><th></th></tr></thead>
+        <tbody>
+          @for (e of items(); track e.enquiry_id) {
+            <tr>
+              <td>{{ e.enquiry_number }}</td>
+              <td>{{ e.applicant_name }}<br /><small class="muted">{{ e.source }}</small></td>
+              <td>{{ e.phone ?? e.email ?? '—' }}</td>
+              <td>{{ e.desired_class_name ?? '—' }}</td>
+              <td><span class="badge badge--{{ e.stage }}">{{ e.stage }}</span></td>
+              <td class="actions">
+                @if (canConvert && !e.converted_student_id && e.stage !== 'Rejected' && e.stage !== 'Lost') {
+                  <button class="link" (click)="convert(e)">Convert → Student</button>
+                }
+                @if (e.converted_student_id) { <span class="muted">Student #{{ e.converted_student_id }}</span> }
+                @if (canManage && !e.converted_student_id) {
+                  <select class="stage-select" (change)="advance(e, $any($event.target).value)">
+                    <option value="">Move to…</option>
+                    @for (s of stages; track s) { <option [value]="s">{{ s }}</option> }
+                  </select>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+}

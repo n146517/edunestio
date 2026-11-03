@@ -1,0 +1,34 @@
+/* Global styles. Keep lightweight; module pages add their own component styles. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1f2a24;
+  background: #fff;
+}
+
+/* Default the app to a compact 80% scale (same look as browser zoom 80%).
+   Users can still zoom further with the browser if they want. */
+body {
+  zoom: 0.8;
+}
+
+/* On phones/tablets the 80% compaction hurts readability and the layout already
+   reflows to a single column, so render at full scale there. */
+@media (max-width: 900px) {
+  body { zoom: 1; }
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+a {
+  color: #14532d;
+}

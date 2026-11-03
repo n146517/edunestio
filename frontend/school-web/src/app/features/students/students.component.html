@@ -1,0 +1,252 @@
+<section class="page">
+  <nav class="crumbs">Students <span>›</span> All Students</nav>
+  <header class="page__head">
+    <div>
+      <h1>Students</h1>
+      <p class="muted">School-specific student records. Admissions, profiles, class enrolment and status.</p>
+    </div>
+    @if (canCreate) {
+      <div class="head-actions">
+        <button class="btn btn--ghost" (click)="downloadTemplate()">⬇ Template</button>
+        <button class="btn btn--ghost" (click)="openImport()">⬆ Import</button>
+        <button class="btn btn--primary" (click)="admit()">Admit Student</button>
+      </div>
+    }
+  </header>
+
+  <!-- Summary cards -->
+  <div class="cards">
+    <div class="card"><span>Total</span><strong>{{ summary()?.total ?? '—' }}</strong></div>
+    <div class="card card--active"><span>Active</span><strong>{{ summary()?.active ?? '—' }}</strong></div>
+    <div class="card card--inactive"><span>Inactive</span><strong>{{ summary()?.inactive ?? '—' }}</strong></div>
+    <div class="card card--grad"><span>Graduated</span><strong>{{ summary()?.graduated ?? '—' }}</strong></div>
+    <div class="card card--withdrawn"><span>Withdrawn</span><strong>{{ summary()?.withdrawn ?? '—' }}</strong></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input type="search" [(ngModel)]="search" (keyup.enter)="applySearch()"
+           placeholder="Search name, admission no, roll no or guardian phone" class="filters__search" />
+    <select [(ngModel)]="classId" (change)="onClassChange()">
+      <option [ngValue]="0">All classes</option>
+      @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+    </select>
+    <select [(ngModel)]="sectionId" (change)="applyFilters()" [disabled]="!classId">
+      <option [ngValue]="0">All sections</option>
+      @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+    </select>
+    <select [(ngModel)]="yearId" (change)="applyFilters()">
+      <option [ngValue]="0">All years</option>
+      @for (y of years(); track y.academic_year_id) { <option [ngValue]="y.academic_year_id">{{ y.name }}</option> }
+    </select>
+    <select [(ngModel)]="status" (change)="applyFilters()">
+      <option value="">All statuses</option>
+      @for (st of statuses; track st) { <option [value]="st">{{ st }}</option> }
+    </select>
+    <button class="btn" (click)="applySearch()">Search</button>
+    <button class="btn btn--ghost" (click)="resetFilters()">Reset</button>
+  </div>
+
+  <!-- Bulk action toolbar (shows when rows are selected) -->
+  @if ((canPromote || canStatus) && selectedIds().length) {
+    <div class="bulkbar">
+      <span><strong>{{ selectedIds().length }}</strong> selected</span>
+      @if (canPromote) {
+        <button class="btn btn--primary" (click)="openPromote()">Promote</button>
+        <button class="btn" (click)="graduateSelected()">Graduate</button>
+        <button class="btn" (click)="withdrawSelected()">Withdraw</button>
+      }
+      @if (canStatus && anySelectedActive()) {
+        <button class="btn btn--danger" (click)="inactivateSelected()">Inactive</button>
+      }
+      @if (canStatus && anySelectedInactive()) {
+        <button class="btn btn--ok" (click)="activateSelected()">Active</button>
+      }
+      <button class="btn btn--ghost" (click)="clearSelection()">Clear</button>
+    </div>
+  }
+
+  <!-- Table / states -->
+  @if (state() === 'loading') {
+    <p class="muted">Loading students…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load students.</p><button class="btn" (click)="load()">Retry</button></div>
+  } @else if (!items().length) {
+    <div class="empty">
+      <p class="muted">No students match your filters.</p>
+      @if (search || classId || sectionId || yearId || status) {
+        <button class="btn btn--ghost" (click)="resetFilters()">Clear filters</button>
+      } @else if (canCreate) {
+        <button class="btn btn--primary" (click)="admit()">Admit your first student</button>
+      }
+    </div>
+  } @else {
+    <div class="tablewrap">
+      <table class="grid">
+        <thead>
+          <tr>
+            @if (canPromote || canStatus) {
+              <th class="check-col">
+                <input type="checkbox" [checked]="allOnPageSelected()" (change)="toggleSelectAll()"
+                       title="Select all on this page" />
+              </th>
+            }
+            <th></th>
+            <th>Name</th>
+            <th>Adm. No.</th>
+            <th class="hide-sm">Class</th>
+            <th class="hide-sm">Section</th>
+            <th class="hide-md">Roll</th>
+            <th class="hide-md">Guardian</th>
+            <th class="hide-lg">Joined</th>
+            <th>Status</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of items(); track s.student_id) {
+            <tr [class.row--selected]="isSelected(s.student_id)">
+              @if (canPromote || canStatus) {
+                <td class="check-col">
+                  <input type="checkbox" [checked]="isSelected(s.student_id)"
+                         (change)="toggleSelect(s)" />
+                </td>
+              }
+              <td>
+                @if (s.photo_url) {
+                  <img class="avatar" [src]="s.photo_url" [alt]="s.first_name" />
+                } @else {
+                  <span class="avatar avatar--initials">{{ initials(s) }}</span>
+                }
+              </td>
+              <td>
+                <a class="link" [routerLink]="['/students', s.student_id]">{{ s.first_name }} {{ s.last_name }}</a>
+              </td>
+              <td>{{ s.admission_number }}</td>
+              <td class="hide-sm">{{ s.class_name ?? '—' }}</td>
+              <td class="hide-sm">{{ s.section_name ?? '—' }}</td>
+              <td class="hide-md">{{ s.roll_number ?? '—' }}</td>
+              <td class="hide-md">{{ s.guardian_phone ?? s.guardian_name ?? '—' }}</td>
+              <td class="hide-lg">{{ s.admission_date ? (s.admission_date | date:'mediumDate') : '—' }}</td>
+              <td><span [class]="statusClass(s.status)">{{ s.status }}</span></td>
+              <td class="actions-col">
+                <div class="actions">
+                  <button class="act" (click)="view(s)" title="View profile">View</button>
+                  @if (canUpdate) { <button class="act" (click)="edit(s)" title="Edit">Edit</button> }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pager">
+      <span class="muted">{{ total() }} record(s)</span>
+      <div class="pager__controls">
+        <label class="inline">Page size
+          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </label>
+        <button class="btn btn--ghost" (click)="changePage(-1)" [disabled]="page() <= 1">Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button class="btn btn--ghost" (click)="changePage(1)" [disabled]="page() >= totalPages()">Next</button>
+      </div>
+    </div>
+  }
+</section>
+
+<!-- Promote dialog -->
+@if (promoteOpen()) {
+  <div class="modal-backdrop" (click)="closePromote()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Promote students</h2>
+      <p class="muted"><strong>{{ selectedIds().length }}</strong> student(s) will move to the target class.
+        Their current class closes as <strong>Promoted</strong> (kept in history) and a new active
+        enrollment opens. The students stay Active.</p>
+      <label>Target class <span class="req">*</span>
+        <select [(ngModel)]="promoteClassId" (change)="onPromoteClassChange()">
+          <option [ngValue]="0">Select…</option>
+          @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+        </select>
+      </label>
+      <label>Section (optional)
+        <select [(ngModel)]="promoteSectionId" [disabled]="!promoteClassId">
+          <option [ngValue]="0">—</option>
+          @for (s of promoteSections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+        </select>
+      </label>
+      <label>Academic year (optional)
+        <select [(ngModel)]="promoteYearId">
+          <option [ngValue]="0">—</option>
+          @for (y of years(); track y.academic_year_id) { <option [ngValue]="y.academic_year_id">{{ y.name }}</option> }
+        </select>
+      </label>
+      <label>Note (optional)
+        <input type="text" [(ngModel)]="promoteNote" placeholder="e.g. Passed 2025-26" />
+      </label>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closePromote()">Cancel</button>
+        <button class="btn btn--primary" (click)="confirmPromote()" [disabled]="bulkBusy()">
+          {{ bulkBusy() ? 'Promoting…' : 'Promote' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Bulk import dialog -->
+@if (importOpen()) {
+  <div class="modal-backdrop" (click)="closeImport()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+      <h2>Import students from Excel</h2>
+      <p class="muted">Download the template, fill one student per row, then upload it here.
+        We validate every row and only import the valid ones.</p>
+
+      <div class="import-pick">
+        <button class="btn btn--ghost" (click)="downloadTemplate()">⬇ Download template</button>
+        <input type="file" accept=".xlsx" (change)="onImportFile($event)" />
+        <button class="btn btn--primary" (click)="runImportPreview()" [disabled]="importing() || !importFile">
+          {{ importing() ? 'Reading…' : 'Preview' }}
+        </button>
+      </div>
+
+      @if (importPreview(); as p) {
+        <div class="import-summary">
+          <span class="chip chip--ok">{{ p.Valid }} valid</span>
+          <span class="chip chip--bad">{{ p.Invalid }} invalid</span>
+        </div>
+        <div class="tablewrap tablewrap--scroll">
+          <table class="grid">
+            <thead><tr><th>Row</th><th>Name</th><th>Class</th><th>Section</th><th>Status</th><th>Issue</th></tr></thead>
+            <tbody>
+              @for (r of p.Rows; track r.RowNumber) {
+                <tr [class.row--bad]="r.Status === 'Invalid'">
+                  <td>{{ r.RowNumber }}</td>
+                  <td>{{ r.FirstName }} {{ r.LastName }}</td>
+                  <td>{{ r.ClassName ?? '—' }}</td>
+                  <td>{{ r.SectionName ?? '—' }}</td>
+                  <td><span class="badge" [class.badge--active]="r.Status === 'Valid'"
+                            [class.badge--withdrawn]="r.Status === 'Invalid'">{{ r.Status }}</span></td>
+                  <td class="issue">{{ r.Error ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closeImport()">Cancel</button>
+        <button class="btn btn--primary" (click)="commitImport()"
+                [disabled]="committing() || !importPreview() || (importPreview()?.Valid ?? 0) === 0">
+          {{ committing() ? 'Importing…' : 'Import ' + (importPreview()?.Valid ?? 0) + ' student(s)' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

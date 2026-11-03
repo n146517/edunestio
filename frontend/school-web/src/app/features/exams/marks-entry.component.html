@@ -1,0 +1,142 @@
+<section class="page">
+  <nav class="crumbs">Exams &amp; Report Cards <span>›</span> Marks Entry</nav>
+  <app-exam-tabs />
+  <h1>Marks Entry</h1>
+
+  <!-- Selectors -->
+  <div class="selectors">
+    <label>Exam
+      <select [(ngModel)]="examId" (change)="onExamChange()">
+        <option [ngValue]="0">Select exam…</option>
+        @for (e of exams(); track e.exam_id) { <option [ngValue]="e.exam_id">{{ examLabel(e) }}</option> }
+      </select>
+    </label>
+    <label>Class
+      <select [(ngModel)]="classId" (change)="onClassChange()" [disabled]="!examId">
+        <option [ngValue]="0">Select class…</option>
+        @for (c of classesForExam(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+    <label>Section
+      <select [(ngModel)]="sectionId" (change)="onSectionChange()" [disabled]="!classId">
+        <option [ngValue]="0">All sections</option>
+        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+      </select>
+    </label>
+    <label>Subject
+      <select [(ngModel)]="subjectId" (change)="onSubjectChange()" [disabled]="!classId">
+        <option [ngValue]="0">Select subject…</option>
+        @for (s of subjects(); track s.subject_id) { <option [ngValue]="s.subject_id">{{ s.subject_name }}</option> }
+      </select>
+    </label>
+    <button class="btn btn--primary" (click)="loadSheet()" [disabled]="!canLoad()">Load</button>
+  </div>
+
+  @if (loadingSheet()) {
+    <p class="muted">Loading roster…</p>
+  } @else if (rows().length) {
+    <div class="toolbar">
+      @if (canMarks) {
+        <button class="btn btn--primary" (click)="saveMarks()" [disabled]="saving()">Save Marks</button>
+        <button class="btn" (click)="saveDraft()" [disabled]="saving()">Save Draft</button>
+        <button class="btn btn--ghost" (click)="openImport()">Import from Excel</button>
+      }
+      <button class="btn btn--ghost" (click)="exportTemplate()">Export Template</button>
+      <input type="search" class="roster-search" [ngModel]="search()" (ngModelChange)="search.set($event)"
+             placeholder="Search roll no / name / adm. no." />
+      <span class="spacer"></span>
+      <span class="muted">Max marks: <strong>{{ maxMarks }}</strong></span>
+    </div>
+
+    <div class="tablewrap">
+      <table class="grid">
+        <thead>
+          <tr><th>#</th><th>Adm. No.</th><th>Roll No.</th><th>Student Name</th><th>Marks ( / {{ maxMarks }} )</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (r of filteredRows(); track r.student_id) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ r.admission_number }}</td>
+              <td>{{ r.roll_number ?? '—' }}</td>
+              <td>{{ r.first_name }} {{ r.last_name }}</td>
+              <td>
+                <input type="number" class="mark" [(ngModel)]="r.marks" [disabled]="r.is_absent || !canMarks"
+                       [min]="0" [max]="maxMarks" />
+                <label class="absent"><input type="checkbox" [(ngModel)]="r.is_absent" [disabled]="!canMarks" /> Absent</label>
+              </td>
+              <td>
+                <span class="badge"
+                      [class.badge--entered]="statusOf(r) === 'Entered'"
+                      [class.badge--absent]="statusOf(r) === 'Absent'">{{ statusOf(r) }}</span>
+              </td>
+            </tr>
+          }
+          @if (!filteredRows().length) {
+            <tr><td colspan="6" class="muted" style="text-align:center;padding:1rem;">No students match “{{ search() }}”.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (canLoad()) {
+    <p class="muted">No students found for this selection.
+      @if (sectionId) { Try <strong>All sections</strong> — the student may not be assigned to this section. }
+      @else { Click <strong>Load</strong> to show the roster. }
+    </p>
+  } @else {
+    <p class="muted">Select an exam, class and subject to begin.</p>
+  }
+</section>
+
+<!-- Import dialog -->
+@if (importOpen()) {
+  <div class="modal-backdrop" (click)="closeImport()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Import marks from Excel</h2>
+      <p class="muted">Upload the filled template. We'll match rows by admission number and validate
+        the marks before anything is saved.</p>
+
+      <div class="upload">
+        <input type="file" accept=".xlsx" (change)="onFile($event)" />
+        <button class="btn btn--primary" (click)="runImport()" [disabled]="importing() || !importFile">
+          {{ importing() ? 'Reading…' : 'Preview' }}
+        </button>
+        <button class="btn btn--ghost" (click)="exportTemplate()">Download Template</button>
+      </div>
+
+      @if (importPreview(); as p) {
+        <div class="summary">
+          <span class="chip chip--ok">{{ p.valid }} valid</span>
+          <span class="chip chip--bad">{{ p.invalid }} invalid</span>
+        </div>
+        <div class="tablewrap tablewrap--scroll">
+          <table class="grid">
+            <thead><tr><th>Adm. No.</th><th>Name</th><th>Marks</th><th>Status</th></tr></thead>
+            <tbody>
+              @for (row of p.rows; track row.admission_number) {
+                <tr>
+                  <td>{{ row.admission_number }}</td>
+                  <td>{{ row.name || '—' }}</td>
+                  <td>{{ row.is_absent ? 'AB' : (row.marks ?? '—') }}</td>
+                  <td>
+                    <span class="badge"
+                          [class.badge--entered]="row.status === 'Valid'"
+                          [class.badge--absent]="row.status !== 'Valid'"
+                          [title]="row.error ?? ''">{{ row.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closeImport()">Cancel</button>
+        <button class="btn btn--primary" (click)="applyImport()" [disabled]="!importPreview()">
+          Apply to grid
+        </button>
+      </div>
+    </div>
+  </div>
+}

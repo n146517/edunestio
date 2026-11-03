@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\WeatherForecastController.cs" />
+    <Compile Remove="WeatherForecast.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EduNestIO.WebServices.Business\EduNestIO.WebServices.Business.csproj" />
+    <ProjectReference Include="..\EduNestIO.WebServices.DataAccess\EduNestIO.WebServices.DataAccess.csproj" />
+    <ProjectReference Include="..\EduNestIO.Common\EduNestIO.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config\appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="config\appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

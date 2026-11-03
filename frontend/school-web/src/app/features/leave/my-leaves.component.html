@@ -1,0 +1,46 @@
+<section class="page">
+  <header class="page__head">
+    <div>
+      <h1>My Leaves</h1>
+      <p class="muted">Your leave requests and their status.</p>
+    </div>
+    <a class="btn btn--primary" routerLink="/leave/apply">+ Apply for Leave</a>
+  </header>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load your leaves.</p>
+      <button class="btn" (click)="load()">Retry</button></div>
+  } @else if (!items().length) {
+    <div class="empty">
+      <p class="muted">You haven't applied for any leave yet.</p>
+      <a class="btn btn--primary" routerLink="/leave/apply">Apply for your first leave</a>
+    </div>
+  } @else {
+    <div class="tablewrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>From</th><th>To</th><th>Type</th><th>Reason</th><th>Status</th><th>Decision note</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (l of items(); track l.leave_id) {
+            <tr>
+              <td>{{ l.from_date | date:'dd MMM yyyy' }}</td>
+              <td>{{ l.to_date | date:'dd MMM yyyy' }}</td>
+              <td>{{ l.leave_type ?? '—' }}</td>
+              <td class="reason">{{ l.reason }}</td>
+              <td><span [class]="statusClass(l.status)">{{ l.status }}</span></td>
+              <td>{{ l.decision_note ?? '—' }}</td>
+              <td>
+                @if (l.status === 'Pending') {
+                  <button class="link-btn" (click)="cancel(l)">Cancel</button>
+                } @else { — }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

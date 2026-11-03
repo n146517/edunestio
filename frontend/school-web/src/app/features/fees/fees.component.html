@@ -1,0 +1,112 @@
+<h1>Fees &amp; Finance</h1>
+<p class="muted">Define fee heads, assign demands to students, collect payments with receipts, and track dues.</p>
+
+<div class="tabs" role="tablist">
+  <button [class.active]="tab()==='collect'" (click)="setTab('collect')">Collect / Ledger</button>
+  <button [class.active]="tab()==='heads'" (click)="setTab('heads')">Fee Heads</button>
+  <button [class.active]="tab()==='defaulters'" (click)="setTab('defaulters')">Defaulters</button>
+  <button [class.active]="tab()==='reports'" (click)="setTab('reports')">Collection Report</button>
+</div>
+
+<!-- COLLECT / LEDGER -->
+@if (tab()==='collect') {
+  <div class="row-form">
+    <label>Student ID <input type="number" [(ngModel)]="ledgerStudentId" placeholder="e.g. 1" /></label>
+    <button class="btn" (click)="loadLedger()">Load ledger</button>
+  </div>
+
+  @if (ledger()) {
+    <div class="totals">
+      <span>Net: <strong>{{ ledger()!.net_total | number:'1.2-2' }}</strong></span>
+      <span>Paid: <strong>{{ ledger()!.paid_total | number:'1.2-2' }}</strong></span>
+      <span class="bal">Balance: <strong>{{ ledger()!.balance | number:'1.2-2' }}</strong></span>
+    </div>
+    <table class="grid">
+      <thead><tr><th>Fee head</th><th>Amount</th><th>Discount</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>
+      <tbody>
+        @for (l of ledger()!.items; track l.fee_assignment_id) {
+          <tr>
+            <td>{{ l.fee_head_name }}</td>
+            <td>{{ l.amount | number:'1.2-2' }}</td>
+            <td>{{ l.discount | number:'1.2-2' }}</td>
+            <td>{{ l.paid | number:'1.2-2' }}</td>
+            <td>{{ l.balance | number:'1.2-2' }}</td>
+            <td><span class="badge badge--{{ l.status }}">{{ l.status }}</span></td>
+          </tr>
+        } @empty { <tr><td colspan="6" class="muted">No fee demands for this student.</td></tr> }
+      </tbody>
+    </table>
+
+    @if (canManage) {
+      <fieldset class="panel">
+        <legend>Assign a fee demand</legend>
+        <select [(ngModel)]="assignHeadId">
+          <option [ngValue]="0">Fee head…</option>
+          @for (h of heads(); track h.fee_head_id) { <option [ngValue]="h.fee_head_id">{{ h.name }}</option> }
+        </select>
+        <input type="number" [(ngModel)]="assignAmount" placeholder="Amount" />
+        <button class="btn btn--primary" [disabled]="busy()" (click)="assign()">Assign</button>
+      </fieldset>
+    }
+
+    @if (canCollect) {
+      <fieldset class="panel">
+        <legend>Record a payment</legend>
+        <input type="number" [(ngModel)]="payAmount" placeholder="Amount" />
+        <select [(ngModel)]="payMode">
+          <option>Cash</option><option>Card</option><option>Online</option><option>Cheque</option><option>BankTransfer</option>
+        </select>
+        <button class="btn btn--primary" [disabled]="busy()" (click)="pay()">Collect &amp; issue receipt</button>
+      </fieldset>
+    }
+  }
+}
+
+<!-- FEE HEADS -->
+@if (tab()==='heads') {
+  @if (canManage) {
+    <div class="row-form">
+      <input type="text" [(ngModel)]="headName" placeholder="Fee head name (e.g. Tuition)" />
+      <input type="text" [(ngModel)]="headCode" placeholder="Code" style="width:120px" />
+      <button class="btn btn--primary" [disabled]="busy()" (click)="addHead()">Add fee head</button>
+    </div>
+  }
+  <table class="grid">
+    <thead><tr><th>Name</th><th>Code</th><th>Status</th></tr></thead>
+    <tbody>
+      @for (h of heads(); track h.fee_head_id) {
+        <tr><td>{{ h.name }}</td><td>{{ h.code }}</td><td>{{ h.is_active ? 'Active' : 'Inactive' }}</td></tr>
+      } @empty { <tr><td colspan="3" class="muted">No fee heads yet.</td></tr> }
+    </tbody>
+  </table>
+}
+
+<!-- DEFAULTERS -->
+@if (tab()==='defaulters') {
+  <table class="grid">
+    <thead><tr><th>Admission #</th><th>Student</th><th>Class</th><th>Balance</th></tr></thead>
+    <tbody>
+      @for (d of defaulters(); track d.student_id) {
+        <tr><td>{{ d.admission_number }}</td><td>{{ d.first_name }} {{ d.last_name }}</td><td>{{ d.class_name ?? '—' }}</td><td>{{ d.balance | number:'1.2-2' }}</td></tr>
+      } @empty { <tr><td colspan="4" class="muted">No outstanding balances.</td></tr> }
+    </tbody>
+  </table>
+}
+
+<!-- COLLECTION REPORT -->
+@if (tab()==='reports') {
+  @if (report()) {
+    <div class="totals">
+      <span>Period: {{ report()!.from }} → {{ report()!.to }}</span>
+      <span>Payments: <strong>{{ report()!.payment_count }}</strong></span>
+      <span class="bal">Total collected: <strong>{{ report()!.total_collected | number:'1.2-2' }}</strong></span>
+    </div>
+    <table class="grid">
+      <thead><tr><th>Mode</th><th>Amount</th></tr></thead>
+      <tbody>
+        @for (m of modes(report()); track m.mode) { <tr><td>{{ m.mode }}</td><td>{{ m.amt | number:'1.2-2' }}</td></tr> }
+        @empty { <tr><td colspan="2" class="muted">No collections in this period.</td></tr> }
+      </tbody>
+    </table>
+  }
+}

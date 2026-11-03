@@ -1,0 +1,143 @@
+<section class="page">
+  <nav class="crumbs">Academics <span>›</span> Assignments</nav>
+  <header class="head">
+    <div>
+      <h1>Assignments</h1>
+      <p class="muted">Set homework for a class, then review and grade student submissions.</p>
+    </div>
+    @if (canManage) { <button class="btn btn--primary" (click)="openCreate()">+ New Assignment</button> }
+  </header>
+
+  <div class="filters">
+    <label>Class
+      <select [(ngModel)]="filterClassId" (change)="load()">
+        <option [ngValue]="0">All classes</option>
+        @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+  </div>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load assignments.</p><button class="btn" (click)="load()">Retry</button></div>
+  } @else if (!items().length) {
+    <div class="empty">
+      <p class="muted">No assignments yet.</p>
+      @if (canManage) { <button class="btn btn--primary" (click)="openCreate()">Create your first assignment</button> }
+    </div>
+  } @else {
+    <div class="cards">
+      @for (a of items(); track a.assignment_id) {
+        <div class="acard">
+          <div class="acard__top">
+            <span class="acard__subject">{{ a.subject_name ?? 'General' }}</span>
+            @if (a.due_date) { <span class="acard__due">Due {{ a.due_date | date:'dd MMM' }}</span> }
+          </div>
+          <h3 class="acard__title">{{ a.title }}</h3>
+          @if (a.description) { <p class="acard__desc">{{ a.description }}</p> }
+          <div class="acard__meta">
+            <span>{{ a.class_name ?? '—' }}{{ a.section_name ? ' · ' + a.section_name : '' }}</span>
+            @if (a.teacher_name) { <span>· {{ a.teacher_name }}</span> }
+            @if (a.max_marks !== null) { <span>· {{ a.max_marks }} marks</span> }
+          </div>
+          <div class="acard__foot">
+            <span class="acard__count">{{ a.submission_count ?? 0 }} submission(s)</span>
+            @if (canManage) {
+              <span class="acard__actions">
+                <button class="link-btn" (click)="openSubmissions(a)">Review</button>
+                <button class="link-btn" (click)="openEdit(a)">Edit</button>
+                <button class="link-btn link-btn--danger" (click)="deleteAssignment(a)">Delete</button>
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<!-- Create / edit dialog -->
+@if (editorOpen()) {
+  <div class="modal-backdrop" (click)="closeEditor()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+      <h2>{{ editId ? 'Edit' : 'New' }} Assignment</h2>
+      <div class="form-grid">
+        <label>Class <span class="req">*</span>
+          <select [(ngModel)]="fClassId" name="c" (change)="onEditClassChange()">
+            <option [ngValue]="0">Select…</option>
+            @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+          </select>
+        </label>
+        <label>Section
+          <select [(ngModel)]="fSectionId" name="s" [disabled]="!fClassId">
+            <option [ngValue]="0">All sections</option>
+            @for (s of editSections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+          </select>
+        </label>
+        <label>Subject
+          <select [(ngModel)]="fSubjectId" name="sub">
+            <option [ngValue]="0">—</option>
+            @for (s of subjects(); track s.subject_id) { <option [ngValue]="s.subject_id">{{ s.name }}</option> }
+          </select>
+        </label>
+        <label>Teacher
+          <select [(ngModel)]="fTeacherId" name="t">
+            <option [ngValue]="0">—</option>
+            @for (t of teachers(); track t.user_id) { <option [ngValue]="t.user_id">{{ t.full_name }}</option> }
+          </select>
+        </label>
+        <label class="span-2">Title <span class="req">*</span>
+          <input type="text" [(ngModel)]="fTitle" name="title" placeholder="e.g. Chapter 5 exercises" />
+        </label>
+        <label class="span-2">Description
+          <textarea rows="3" [(ngModel)]="fDesc" name="desc" placeholder="Instructions for students…"></textarea>
+        </label>
+        <label>Due date <input type="date" [(ngModel)]="fDue" name="due" /></label>
+        <label>Max marks <input type="number" [(ngModel)]="fMax" name="max" min="0" /></label>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closeEditor()">Cancel</button>
+        <button class="btn btn--primary" (click)="saveAssignment()" [disabled]="busy()">{{ busy() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Submissions dialog -->
+@if (subsOpen()) {
+  <div class="modal-backdrop" (click)="closeSubs()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+      <h2>Submissions · {{ subsFor()?.title }}</h2>
+      <p class="muted">{{ submittedCount() }} of {{ subs().length }} student(s) submitted.</p>
+      @if (subsLoading()) {
+        <p class="muted">Loading…</p>
+      } @else {
+        <div class="tablewrap">
+          <table class="tbl">
+            <thead><tr><th>Roll</th><th>Student</th><th>Status</th><th>Submission</th><th>Marks</th><th></th></tr></thead>
+            <tbody>
+              @for (s of subs(); track s.student_id) {
+                <tr>
+                  <td>{{ s.roll_number ?? '—' }}</td>
+                  <td>{{ s.first_name }} {{ s.last_name }}</td>
+                  <td>
+                    @if (s.status === 'Graded') { <span class="pill pill--graded">Graded</span> }
+                    @else if (s.status === 'Submitted') { <span class="pill pill--sub">Submitted</span> }
+                    @else { <span class="pill pill--none">Not submitted</span> }
+                  </td>
+                  <td class="subcontent">{{ s.content ?? '—' }}</td>
+                  <td>{{ s.marks !== null ? s.marks : '—' }}</td>
+                  <td>
+                    @if (s.submission_id) { <button class="link-btn" (click)="grade(s)">Grade</button> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <div class="modal__actions"><button class="btn btn--ghost" (click)="closeSubs()">Close</button></div>
+    </div>
+  </div>
+}

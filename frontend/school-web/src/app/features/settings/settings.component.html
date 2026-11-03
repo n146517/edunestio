@@ -1,0 +1,35 @@
+<section class="page">
+  <h1>School Settings</h1>
+  <p class="muted">Configure how this school works. Changes apply to everyone in your school.</p>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="card"><p class="error">Could not load settings.</p></div>
+  } @else if (settings(); as s) {
+    <div class="card">
+      <h2>Attendance Mode</h2>
+      <p class="muted">Choose how teachers record attendance in <strong>{{ s.name }}</strong>.</p>
+
+      <div class="options">
+        <button class="opt" [class.opt--active]="s.attendance_mode === 'Daily'"
+                [disabled]="!canManage || saving()" (click)="setMode('Daily')">
+          <span class="opt__title">📅 Daily (one-time)</span>
+          <span class="opt__desc">One attendance per student per day. Best for most schools.</span>
+          @if (s.attendance_mode === 'Daily') { <span class="opt__badge">Current</span> }
+        </button>
+
+        <button class="opt" [class.opt--active]="s.attendance_mode === 'Subject'"
+                [disabled]="!canManage || saving()" (click)="setMode('Subject')">
+          <span class="opt__title">📚 Subject-wise (period)</span>
+          <span class="opt__desc">Separate attendance per subject/period each day.</span>
+          @if (s.attendance_mode === 'Subject') { <span class="opt__badge">Current</span> }
+        </button>
+      </div>
+
+      @if (!canManage) {
+        <p class="muted small">You can view this setting but only an admin can change it.</p>
+      }
+    </div>
+  }
+</section>

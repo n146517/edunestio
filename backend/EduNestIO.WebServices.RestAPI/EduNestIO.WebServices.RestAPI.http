@@ -1,0 +1,6 @@
+@EduNestIO.WebServices.RestAPI_HostAddress = http://localhost:5022
+
+GET {{EduNestIO.WebServices.RestAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

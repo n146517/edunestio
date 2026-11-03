@@ -1,0 +1,55 @@
+<section class="page">
+  <nav class="crumbs">Leave <span>›</span> Requests</nav>
+  <h1>Leave Requests</h1>
+  <p class="muted">Review and decide student leave applications. Approving marks those days as Leave in attendance.</p>
+
+  <div class="filters">
+    <input type="search" [(ngModel)]="search" (keyup.enter)="load()"
+           placeholder="Search name or admission no" class="filters__search" />
+    <select [(ngModel)]="status" (change)="load()">
+      <option value="">All statuses</option>
+      @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+    </select>
+    <button class="btn" (click)="load()">Search</button>
+  </div>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load leave requests.</p>
+      <button class="btn" (click)="load()">Retry</button></div>
+  } @else if (!items().length) {
+    <div class="empty"><p class="muted">No leave requests match this view.</p></div>
+  } @else {
+    <div class="tablewrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>Student</th><th>Adm. No.</th><th>Class</th><th>From</th><th>To</th><th>Type</th>
+            <th>Reason</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (l of items(); track l.leave_id) {
+            <tr>
+              <td>{{ l.first_name }} {{ l.last_name }}</td>
+              <td>{{ l.admission_number }}</td>
+              <td>{{ l.class_name ?? '—' }}{{ l.section_name ? ' - ' + l.section_name : '' }}</td>
+              <td>{{ l.from_date | date:'dd MMM yyyy' }}</td>
+              <td>{{ l.to_date | date:'dd MMM yyyy' }}</td>
+              <td>{{ l.leave_type ?? '—' }}</td>
+              <td class="reason">{{ l.reason }}</td>
+              <td><span [class]="statusClass(l.status)">{{ l.status }}</span></td>
+              <td>
+                @if (l.status === 'Pending') {
+                  <div class="row-actions">
+                    <button class="btn btn--ok btn--sm" (click)="decide(l, 'Approved')" [disabled]="busyId() === l.leave_id">Approve</button>
+                    <button class="btn btn--danger btn--sm" (click)="decide(l, 'Rejected')" [disabled]="busyId() === l.leave_id">Reject</button>
+                  </div>
+                } @else { <span class="muted">{{ l.decision_note ?? '—' }}</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,153 @@
+<section class="page">
+  <a class="back" routerLink="/students">← Back to Students</a>
+
+  <header class="page__head">
+    <h1>{{ isEdit ? 'Edit student' : 'Admit student' }}</h1>
+    @if (isEdit && admissionNumber()) {
+      <p class="muted">Admission number <strong>{{ admissionNumber() }}</strong> (fixed — not changed on edit).</p>
+    } @else {
+      <p class="muted">The admission number is generated automatically on save.</p>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else {
+    <form class="form" [formGroup]="form" (ngSubmit)="save()">
+      <!-- Personal -->
+      <div class="section">
+        <h2 class="section__title">👤 Personal details</h2>
+        <div class="grid">
+          <label class="req">First name
+            <input type="text" formControlName="FirstName" />
+            @if (invalid('FirstName')) { <small class="err">First name is required.</small> }
+          </label>
+          <label>Middle name
+            <input type="text" formControlName="MiddleName" />
+          </label>
+          <label class="req">Last name
+            <input type="text" formControlName="LastName" />
+            @if (invalid('LastName')) { <small class="err">Last name is required.</small> }
+          </label>
+          <label>Gender
+            <select formControlName="Gender">
+              <option value="">Select…</option>
+              @for (g of genders; track g) { <option [value]="g">{{ g }}</option> }
+            </select>
+          </label>
+          <label>Date of birth
+            <input type="date" formControlName="DateOfBirth" />
+          </label>
+          <label>Nationality
+            <input type="text" formControlName="Nationality" />
+          </label>
+          <label>Blood group
+            <select formControlName="BloodGroup">
+              <option value="">Select…</option>
+              @for (b of bloodGroups; track b) { <option [value]="b">{{ b }}</option> }
+            </select>
+          </label>
+          <label>Photo URL
+            <input type="text" formControlName="PhotoUrl" placeholder="https://…" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Academic -->
+      <div class="section">
+        <h2 class="section__title">🎓 Academic details</h2>
+        <div class="grid">
+          <label>Class
+            <select formControlName="ClassId" (change)="onClassChange()">
+              <option [ngValue]="0">Select…</option>
+              @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+            </select>
+          </label>
+          <label>Section
+            <select formControlName="SectionId" [attr.disabled]="!form.controls.ClassId.value ? true : null">
+              <option [ngValue]="0">Select…</option>
+              @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+            </select>
+          </label>
+          <label>Academic year
+            <select formControlName="AcademicYearId">
+              <option [ngValue]="0">Select…</option>
+              @for (y of years(); track y.academic_year_id) { <option [ngValue]="y.academic_year_id">{{ y.name }}</option> }
+            </select>
+          </label>
+          <label>Roll number
+            <input type="text" formControlName="RollNumber" />
+          </label>
+          <label>Admission / joining date
+            <input type="date" formControlName="AdmissionDate" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Guardian -->
+      <div class="section">
+        <h2 class="section__title">👪 Parent / guardian</h2>
+        <div class="grid">
+          <label>Guardian name
+            <input type="text" formControlName="GuardianName" />
+          </label>
+          <label>Relationship
+            <input type="text" formControlName="GuardianRelation" placeholder="Father / Mother / Guardian" />
+          </label>
+          <label>Primary phone
+            <input type="text" formControlName="GuardianPhone" />
+            @if (invalid('GuardianPhone')) { <small class="err">Enter a valid phone number.</small> }
+          </label>
+          <label>Alternate phone
+            <input type="text" formControlName="GuardianAltPhone" />
+            @if (invalid('GuardianAltPhone')) { <small class="err">Enter a valid phone number.</small> }
+          </label>
+          <label>Guardian email
+            <input type="email" formControlName="GuardianEmail" />
+            @if (invalid('GuardianEmail')) { <small class="err">Enter a valid email.</small> }
+          </label>
+        </div>
+      </div>
+
+      <!-- Contact + address -->
+      <div class="section">
+        <h2 class="section__title">📍 Contact and address</h2>
+        <div class="grid">
+          <label>Student email
+            <input type="email" formControlName="Email" />
+            @if (invalid('Email')) { <small class="err">Enter a valid email.</small> }
+          </label>
+          <label>Student phone
+            <input type="text" formControlName="Phone" />
+            @if (invalid('Phone')) { <small class="err">Enter a valid phone number.</small> }
+          </label>
+          <label class="wide">Address line 1
+            <input type="text" formControlName="AddressLine1" />
+          </label>
+          <label class="wide">Address line 2
+            <input type="text" formControlName="AddressLine2" />
+          </label>
+          <label>City
+            <input type="text" formControlName="City" />
+          </label>
+          <label>State
+            <input type="text" formControlName="State" />
+          </label>
+          <label>PIN code
+            <input type="text" formControlName="PostalCode" />
+          </label>
+          <label>Country
+            <input type="text" formControlName="Country" />
+          </label>
+        </div>
+      </div>
+
+      <div class="form__actions">
+        <button type="button" class="btn btn--ghost" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : (isEdit ? 'Save changes' : 'Admit student') }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

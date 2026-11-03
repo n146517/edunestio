@@ -1,0 +1,159 @@
+<section class="page">
+  <nav class="crumbs">Exams &amp; Report Cards <span>›</span> <a routerLink="/exams">Exams</a> <span>›</span>
+    {{ isEdit ? 'Edit Exam' : 'Create Exam' }}</nav>
+
+  <!-- Stepper -->
+  <ol class="stepper">
+    <li [class.active]="step() === 1" [class.done]="step() > 1"><span>1</span> Details</li>
+    <li [class.active]="step() === 2" [class.done]="step() > 2"><span>2</span> Classes &amp; Subjects</li>
+    <li [class.active]="step() === 3" [class.done]="step() > 3"><span>3</span> Schedule</li>
+    <li [class.active]="step() === 4"><span>4</span> Settings</li>
+  </ol>
+
+  <!-- STEP 1 — Details -->
+  @if (step() === 1) {
+    <div class="card">
+      <h2>Create Examination</h2>
+      <div class="formgrid">
+        <label class="req">Exam Name
+          <input type="text" [(ngModel)]="details.Name" placeholder="Half Yearly Examination" />
+        </label>
+        <label>Academic Year
+          <select [(ngModel)]="details.AcademicYearId">
+            <option [ngValue]="0">Select…</option>
+            @for (y of years(); track y.academic_year_id) { <option [ngValue]="y.academic_year_id">{{ y.name }}</option> }
+          </select>
+        </label>
+        <label>Exam Type
+          <select [(ngModel)]="details.ExamType">
+            <option value="">Select…</option>
+            @for (t of examTypes; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </label>
+        <label>Start Date
+          <input type="date" [(ngModel)]="details.StartDate" />
+        </label>
+        <label>End Date
+          <input type="date" [(ngModel)]="details.EndDate" />
+        </label>
+        <label class="wide">Description
+          <textarea rows="2" [(ngModel)]="details.Description" placeholder="Half yearly examination for Grade 1 to 5."></textarea>
+        </label>
+      </div>
+
+      <h3>Select Classes <span class="req">*</span></h3>
+      <div class="classpick">
+        @for (c of classes(); track c.class_id) {
+          <label class="chk" [class.chk--on]="isClassSelected(c.class_id)">
+            <input type="checkbox" [checked]="isClassSelected(c.class_id)" (change)="toggleClass(c.class_id)" />
+            {{ c.name }}
+          </label>
+        }
+      </div>
+
+      <div class="actions">
+        <button class="btn btn--ghost" (click)="cancel()">Cancel</button>
+        <button class="btn btn--primary" (click)="saveDetailsAndNext()" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Next: Configure Classes →' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- STEP 2 — Classes & Subjects -->
+  @if (step() === 2) {
+    <div class="card">
+      <h2>Configure Classes &amp; Subjects</h2>
+      <div class="classtabs">
+        @for (id of selectedClassIds(); track id) {
+          <button class="classtab" [class.classtab--active]="activeClass() === id" (click)="selectClassTab(id)">
+            {{ className(id) }}
+          </button>
+        }
+      </div>
+
+      <table class="grid">
+        <thead>
+          <tr><th>#</th><th>Subject</th><th>Max Marks</th><th>Passing Marks</th><th>Type</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (r of rowsFor(activeClass()); track $index) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>
+                <select [(ngModel)]="r.subject_id">
+                  <option [ngValue]="0">Select subject…</option>
+                  @for (s of subjects(); track s.subject_id) { <option [ngValue]="s.subject_id">{{ s.name }} ({{ s.code }})</option> }
+                </select>
+              </td>
+              <td><input type="number" class="num" [(ngModel)]="r.max_marks" /></td>
+              <td><input type="number" class="num" [(ngModel)]="r.pass_marks" /></td>
+              <td>
+                <select [(ngModel)]="r.subject_type">
+                  @for (t of subjectTypes; track t) { <option [value]="t">{{ t }}</option> }
+                </select>
+              </td>
+              <td><button class="act act--danger" (click)="removeSubjectRow($index)">Remove</button></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="muted">No subjects yet. Add one below.</td></tr>
+          }
+        </tbody>
+      </table>
+      <button class="btn btn--sm" (click)="addSubjectRow()">+ Add Subject</button>
+
+      <div class="actions">
+        <button class="btn btn--ghost" (click)="step.set(1)">← Back</button>
+        <button class="btn" (click)="saveCurrentClassSubjects()" [disabled]="saving()">Save this class</button>
+        <button class="btn btn--primary" (click)="subjectsAndNext()" [disabled]="saving()">Next: Schedule →</button>
+      </div>
+      <p class="hint">Tip: save each class's subjects, switch tabs to configure the rest, then continue.</p>
+    </div>
+  }
+
+  <!-- STEP 3 — Schedule -->
+  @if (step() === 3) {
+    <div class="card">
+      <h2>Subject-wise Exam Schedule</h2>
+      @if (!scheduleRows().length) {
+        <p class="muted">No subjects configured yet. Go back and add subjects first.</p>
+      } @else {
+        <table class="grid">
+          <thead>
+            <tr><th>#</th><th>Class</th><th>Subject</th><th>Exam Date</th><th>Start</th><th>End</th><th>Room</th></tr>
+          </thead>
+          <tbody>
+            @for (r of scheduleRows(); track r.exam_subject_id) {
+              <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ r.class_name ?? '—' }}</td>
+                <td>{{ r.subject_name }} <span class="type">{{ r.subject_type }}</span></td>
+                <td><input type="date" [(ngModel)]="r.exam_date" /></td>
+                <td><input type="time" [(ngModel)]="r.start_time" /></td>
+                <td><input type="time" [(ngModel)]="r.end_time" /></td>
+                <td><input type="text" [(ngModel)]="r.room" placeholder="Room 101" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      <div class="actions">
+        <button class="btn btn--ghost" (click)="step.set(2)">← Back</button>
+        <button class="btn btn--primary" (click)="saveScheduleAndNext()" [disabled]="saving()">Next: Settings →</button>
+      </div>
+    </div>
+  }
+
+  <!-- STEP 4 — Settings / done -->
+  @if (step() === 4) {
+    <div class="card">
+      <h2>All set</h2>
+      <p class="muted">The exam, its classes, subjects and schedule are saved. You can enter marks from
+        the Marks Entry screen once the exam begins.</p>
+      <div class="actions">
+        <button class="btn btn--ghost" (click)="step.set(3)">← Back</button>
+        <button class="btn btn--primary" (click)="finish()">Finish</button>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,78 @@
+@if (state() === 'loading') {
+  <p class="muted pad">Loading report card…</p>
+} @else if (state() === 'error') {
+  <p class="error pad">Report card not available.</p>
+} @else if (card(); as c) {
+  <div class="toolbar no-print">
+    <button class="btn btn--primary" (click)="print()">Print / Save as PDF</button>
+  </div>
+
+  <div class="card">
+    <!-- School header -->
+    <header class="school">
+      <div class="logo">EduNestIO</div>
+      <div class="school__info">
+        <h1>{{ c.exam.school_name }}</h1>
+        <p>{{ c.exam.exam_name }}@if (c.exam.academic_year_name) { · {{ c.exam.academic_year_name }} }</p>
+        <span class="tag">REPORT CARD</span>
+      </div>
+    </header>
+
+    <!-- Student block -->
+    <section class="student">
+      @if (c.student.photo_url) {
+        <img class="photo" [src]="c.student.photo_url" alt="photo" />
+      } @else {
+        <div class="photo photo--ph">{{ (c.student.first_name[0] || '') + (c.student.last_name[0] || '') }}</div>
+      }
+      <dl>
+        <div><dt>Name</dt><dd>{{ c.student.first_name }} {{ c.student.last_name }}</dd></div>
+        <div><dt>Adm. No.</dt><dd>{{ c.student.admission_number }}</dd></div>
+        <div><dt>Class</dt><dd>{{ c.student.class_name ?? '—' }}{{ c.student.section_name ? ' - ' + c.student.section_name : '' }}</dd></div>
+        <div><dt>Roll No.</dt><dd>{{ c.student.roll_number ?? '—' }}</dd></div>
+      </dl>
+    </section>
+
+    <!-- Marks table -->
+    <table class="marks">
+      <thead>
+        <tr><th>Subject</th><th>Type</th><th>Max Marks</th><th>Obtained</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        @for (s of c.subjects; track s.subject_name) {
+          <tr>
+            <td>{{ s.subject_name }}</td>
+            <td>{{ s.subject_type }}</td>
+            <td>{{ s.max_marks }}</td>
+            <td>{{ marksText(s) }}</td>
+            <td [class.fail]="!s.passed" [class.pass]="s.passed">{{ s.passed ? 'Pass' : 'Fail' }}</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">Total</td>
+          <td>{{ c.max_total | number:'1.0-2' }}</td>
+          <td>{{ c.obtained | number:'1.0-2' }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Summary -->
+    <section class="summary">
+      <div><span>Percentage</span><strong>{{ c.percentage | number:'1.0-2' }}%</strong></div>
+      <div><span>Overall Grade</span><strong>{{ c.grade }}</strong></div>
+      <div><span>Result</span><strong [class.pass]="c.result === 'Pass'" [class.fail]="c.result === 'Fail'">{{ c.result }}</strong></div>
+    </section>
+
+    @if (!c.is_published) {
+      <p class="draft no-print">Draft — results not yet published.</p>
+    }
+
+    <footer class="sign">
+      <div>Class Teacher</div>
+      <div>Principal</div>
+    </footer>
+  </div>
+}

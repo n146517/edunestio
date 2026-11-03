@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="EduNestIO.Common/EduNestIO.Common.csproj" />
+  <Project Path="EduNestIO.Tests/EduNestIO.Tests.csproj" />
+  <Project Path="EduNestIO.WebServices.Business/EduNestIO.WebServices.Business.csproj" />
+  <Project Path="EduNestIO.WebServices.DataAccess/EduNestIO.WebServices.DataAccess.csproj" />
+  <Project Path="EduNestIO.WebServices.RestAPI/EduNestIO.WebServices.RestAPI.csproj" />
+</Solution>

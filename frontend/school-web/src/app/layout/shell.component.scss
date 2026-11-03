@@ -1,0 +1,234 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    height: 56px;
+    background: #14532d;
+    color: #fff;
+    position: relative;
+    z-index: 1000;            // keep the header (and its user dropdown) above the body/nav
+  }
+
+  &__brand {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  &__hamburger {
+    display: none;            // shown only on small screens (media query below)
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.1rem 0.3rem;
+  }
+
+  &__logo {
+    display: block;
+    border-radius: 6px;
+  }
+
+  /* School name, centered in the header (absolute so left/right widths don't shift it). */
+  &__school {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    color: #fff; font-weight: 600; font-size: 0.95rem;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.25rem 0.9rem; border-radius: 999px; max-width: 46%;
+    &-ic { font-size: 1rem; flex: none; }
+    &-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media (max-width: 760px) { display: none; } // keep small headers clean
+  }
+
+  &__headright {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  &__user {
+    position: relative;
+  }
+
+  &__body {
+    display: flex;
+    flex: 1;
+    position: relative;
+  }
+
+  &__overlay {
+    display: none;            // only used as the drawer backdrop on mobile
+  }
+
+  &__nav {
+    width: 256px;
+    background: #ffffff;
+    border-right: 1px solid #e5e9e6;
+    padding: 0.5rem 0;
+    overflow-y: auto;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    min-width: 0;             // allow content (tables) to shrink instead of overflow
+  }
+}
+
+/* ---- Mobile: sidebar becomes an off-canvas drawer ---- */
+@media (max-width: 900px) {
+  .shell__hamburger { display: inline-block; }
+
+  .shell__nav {
+    position: fixed;
+    top: 56px;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 50;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .shell--nav-open .shell__nav { transform: translateX(0); }
+
+  .shell--nav-open .shell__overlay {
+    display: block;
+    position: fixed;
+    top: 56px;
+    inset: 56px 0 0 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+  }
+
+  .shell__content { padding: 1rem; }
+}
+
+/* ===== Grouped sidebar navigation ===== */
+.nav { list-style: none; margin: 0; padding: 0.5rem 0; }
+.nav__group { padding: 0; }
+
+/* Group header (icon + label + caret) — and single top-level links reuse it. */
+.group-head {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%;
+  background: transparent; border: none; cursor: pointer; font: inherit; text-align: left;
+  padding: 0.7rem 0.9rem; color: #14532d; font-weight: 700; font-size: 0.92rem;
+  text-decoration: none; border-radius: 0; transition: background 0.1s ease;
+  &:hover { background: #eaf3ec; }
+  &__icon { font-size: 1.05rem; width: 1.3rem; text-align: center; flex: none; line-height: 1; }
+  /* Label keeps to one line; if ever too long it truncates with an ellipsis
+     instead of pushing the icon/caret out of alignment. */
+  &__label { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  &__caret { font-size: 0.95rem; color: #7c8a82; flex: none; }
+
+  /* A single link that is the active route (e.g. Dashboard). */
+  &--link.active { background: #dcfce7; }
+}
+
+/* Children list under a group */
+.nav-sub {
+  list-style: none; margin: 0 0 0.4rem; padding: 0;
+  position: relative;
+  /* subtle guide line like the mock */
+  &::before {
+    content: ''; position: absolute; left: 1.55rem; top: 0.1rem; bottom: 0.3rem;
+    width: 1px; background: #dce5df;
+  }
+}
+
+.sub-link {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 1.1rem 0.5rem 1.4rem; margin-left: 0.3rem;
+  color: #4b5a52; text-decoration: none; font-size: 0.9rem; border-radius: 8px;
+  transition: background 0.1s ease, color 0.1s ease;
+
+  &__dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #c3ccc6; flex: none;
+    transition: background 0.1s ease;
+  }
+  &__badge {
+    margin-left: auto; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.03em;
+    background: #e2e8e4; color: #6b7772; border-radius: 10px; padding: 0.08rem 0.4rem;
+  }
+
+  &:hover { background: #f0f5f1; color: #14532d; }
+  &.active {
+    background: #dcfce7; color: #166534; font-weight: 700;
+    .sub-link__dot { background: #16a34a; }
+  }
+  &--planned { color: #9aa4a0; }
+}
+
+.yearpick {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px; padding: 0.1rem 0.5rem;
+  &__ic { font-size: 0.9rem; }
+  select {
+    background: transparent; border: none; color: #fff; font: inherit; font-size: 0.85rem;
+    font-weight: 600; padding: 0.3rem 0.2rem; cursor: pointer; outline: none;
+    option { color: #1f2a24; }  // readable in the opened list
+  }
+  @media (max-width: 560px) { display: none; } // keep the mobile header compact
+}
+
+.user-menu__trigger {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  background: #fff;
+  color: #1f2a24;
+  border: 1px solid #e0e4e2;
+  border-radius: 6px;
+  min-width: 230px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 1100;            // above the mobile nav drawer (z-index 50) so Sign out isn't hidden
+
+  &__info {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.82rem;
+  }
+
+  &__email { font-weight: 600; }
+  &__tenant, &__roles { color: #5a645f; margin-top: 0.2rem; }
+
+  &__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.65rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover { background: #f4f6f5; }
+  }
+}

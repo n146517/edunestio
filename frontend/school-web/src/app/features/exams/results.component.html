@@ -1,0 +1,120 @@
+<section class="page">
+  <nav class="crumbs">Exams &amp; Report Cards <span>›</span> Results</nav>
+  <app-exam-tabs />
+  <h1>Result Preview</h1>
+
+  <div class="selectors">
+    <label>Exam
+      <select [(ngModel)]="examId" (change)="onExamChange()">
+        <option [ngValue]="0">Select exam…</option>
+        @for (e of exams(); track e.exam_id) { <option [ngValue]="e.exam_id">{{ examLabel(e) }}</option> }
+      </select>
+    </label>
+    <label>Class
+      <select [(ngModel)]="classId" (change)="onClassChange()" [disabled]="!examId">
+        <option [ngValue]="0">Select class…</option>
+        @for (c of classesForExam(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+    <label>Section
+      <select [(ngModel)]="sectionId" [disabled]="!classId">
+        <option [ngValue]="0">All sections</option>
+        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+      </select>
+    </label>
+    <button class="btn" (click)="checkMissing()" [disabled]="!canCalc()">Check Missing Marks</button>
+    <button class="btn btn--primary" (click)="calculate()" [disabled]="!canCalc()">Calculate Results</button>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Calculating…</p>
+  } @else if (preview(); as p) {
+    <!-- Summary cards -->
+    <div class="cards">
+      <div class="card"><span>Total Students</span><strong>{{ p.total_students }}</strong></div>
+      <div class="card card--ok"><span>Completed</span><strong>{{ p.completed }}</strong></div>
+      <div class="card card--bad"><span>Missing Marks</span><strong>{{ p.missing }}</strong></div>
+      <div class="card" [class.card--ok]="p.ready_to_publish" [class.card--bad]="!p.ready_to_publish">
+        <span>Ready to Publish</span><strong>{{ p.ready_to_publish ? 'Yes' : 'No' }}</strong>
+      </div>
+    </div>
+
+    @if (canPublish) {
+      <div class="pubrow">
+        @if (isPublished()) {
+          <span class="badge badge--ready">✓ Published</span>
+          <button class="btn btn--primary" (click)="openPublish()">Re-publish (update marks)</button>
+          <button class="btn btn--ghost" (click)="unpublish()" [disabled]="publishing()">Unpublish</button>
+          <span class="warn">Already published. Report cards update live — re-publish only to refresh edited marks.</span>
+        } @else {
+          <button class="btn btn--primary" (click)="openPublish()">Publish Results</button>
+          @if (!p.ready_to_publish) { <span class="warn">Some students have missing marks — publishing will require an override.</span> }
+        }
+      </div>
+    }
+
+    <div class="tablewrap">
+      <table class="grid">
+        <thead>
+          <tr><th>#</th><th>Adm. No.</th><th>Student</th><th>Total</th><th>%</th><th>Grade</th><th>Result</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (r of p.items; track r.student_id) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ r.admission_number }}</td>
+              <td>{{ r.first_name }} {{ r.last_name }}</td>
+              <td>{{ r.obtained | number:'1.0-2' }} / {{ r.max_total | number:'1.0-2' }}</td>
+              <td>{{ r.percentage | number:'1.0-2' }}%</td>
+              <td>{{ r.grade ?? '—' }}</td>
+              <td><span [class]="resultClass(r.result)">{{ r.result }}</span></td>
+              <td>
+                <span [class]="statusClass(r.status)">{{ r.status }}</span>
+                @if (r.status === 'Missing' && r.missing_subjects) {
+                  <div class="missing-subs" [title]="r.missing_subjects">
+                    Pending: {{ r.missing_subjects }}
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="muted">Select an exam and class, then Calculate Results.</p>
+  }
+</section>
+
+<!-- Publish dialog -->
+@if (publishOpen()) {
+  <div class="modal-backdrop" (click)="closePublish()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ isPublished() ? 'Re-publish Results' : 'Publish Results' }}</h2>
+      @if (preview(); as p) {
+        <p class="muted">Exam <strong>{{ selectedExam()?.name }}</strong> — {{ p.completed }}/{{ p.total_students }}
+          students completed, {{ p.missing }} missing.</p>
+        @if (isPublished()) {
+          <div class="note">This exam is already published. Re-publishing refreshes the (already live) report
+            cards with the latest edited marks.</div>
+        } @else {
+          <div class="note">Once published, results become visible in report cards and portals.</div>
+        }
+
+        @if (p.missing > 0) {
+          <label class="chk"><input type="checkbox" [(ngModel)]="forceOverride" />
+            Override the missing-marks block and publish anyway ({{ p.missing }} incomplete)</label>
+        }
+        <label class="chk"><input type="checkbox" [(ngModel)]="publishVerified" />
+          I confirm all marks have been reviewed and verified.</label>
+      }
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closePublish()">Cancel</button>
+        <button class="btn btn--primary" (click)="confirmPublish()"
+                [disabled]="!publishVerified || publishing()">
+          {{ publishing() ? 'Saving…' : (isPublished() ? 'Re-publish' : 'Publish Results') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

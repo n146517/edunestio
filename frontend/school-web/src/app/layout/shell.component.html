@@ -1,0 +1,107 @@
+<div class="shell" [class.shell--nav-open]="navOpen()">
+  <header class="shell__header">
+    <div class="shell__brand">
+      <button type="button" class="shell__hamburger" (click)="toggleNav()" aria-label="Toggle menu">&#9776;</button>
+      <img src="logo-mark.svg" alt="" width="28" height="28" class="shell__logo" />
+      <span>EduNestIO</span>
+    </div>
+
+    @if (store.tenantName()) {
+      <div class="shell__school" title="Signed in to this school">
+        <span class="shell__school-ic">🏫</span>
+        <span class="shell__school-name">{{ store.tenantName() }}</span>
+      </div>
+    }
+
+    <div class="shell__headright">
+      @if (showYearPicker && yearStore.years().length) {
+        <label class="yearpick" title="Active academic year — scopes the portal">
+          <span class="yearpick__ic">🗓</span>
+          <select [ngModel]="yearStore.selectedId()" (ngModelChange)="onYearChange($event)">
+            <option [ngValue]="0">All years</option>
+            @for (y of yearStore.years(); track y.academic_year_id) {
+              <option [ngValue]="y.academic_year_id">{{ y.name }}</option>
+            }
+          </select>
+        </label>
+      }
+
+    <div class="shell__user">
+      <button type="button" class="user-menu__trigger" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()">
+        {{ store.username() ?? 'Account' }} &#9662;
+      </button>
+      @if (menuOpen()) {
+        <div class="user-menu" role="menu">
+          <div class="user-menu__info">
+            <div class="user-menu__email">{{ store.fullName() ?? store.username() }}</div>
+            <div class="user-menu__tenant">Tenant: {{ store.tenantName() ?? 'platform' }}</div>
+            <div class="user-menu__roles">Roles: {{ store.roles().join(', ') || 'none' }}</div>
+          </div>
+          <button type="button" class="user-menu__item" role="menuitem" (click)="logout()">Sign out</button>
+        </div>
+      }
+    </div>
+    </div>
+  </header>
+
+  <div class="shell__body">
+    <div class="shell__overlay" (click)="closeNav()"></div>
+    <nav class="shell__nav" aria-label="Main navigation">
+      <ul class="nav">
+        @for (item of nav; track item.label) {
+          <li class="nav__group">
+            @if (item.children) {
+              <!-- Group header: icon + label + caret, toggles its children -->
+              <button
+                type="button"
+                class="group-head"
+                [class.open]="isExpanded(item.label)"
+                (click)="toggleGroup(item.label)"
+              >
+                <span class="group-head__icon">{{ item.icon }}</span>
+                <span class="group-head__label">{{ item.label }}</span>
+                <span class="group-head__caret">{{ isExpanded(item.label) ? '⌄' : '›' }}</span>
+              </button>
+              @if (isExpanded(item.label)) {
+                <ul class="nav-sub">
+                  @for (child of item.children; track child.label) {
+                    <li>
+                      <a
+                        [routerLink]="child.route"
+                        routerLinkActive="active"
+                        [routerLinkActiveOptions]="{ exact: true }"
+                        class="sub-link"
+                        [class.sub-link--planned]="child.planned"
+                        (click)="closeNav()"
+                      >
+                        <span class="sub-link__dot"></span>
+                        {{ child.label }}
+                        @if (child.planned) { <span class="sub-link__badge">soon</span> }
+                      </a>
+                    </li>
+                  }
+                </ul>
+              }
+            } @else {
+              <!-- Single top-level link (Dashboard, self-service items) -->
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="group-head group-head--link"
+                [routerLinkActiveOptions]="{ exact: true }"
+                (click)="closeNav()"
+              >
+                <span class="group-head__icon">{{ item.icon }}</span>
+                <span class="group-head__label">{{ item.label }}</span>
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

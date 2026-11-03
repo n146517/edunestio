@@ -1,0 +1,53 @@
+$green: #0f5132;
+
+.pad { padding: 2rem; }
+.muted { color: #6b7772; } .error { color: #b3261e; }
+
+.toolbar { padding: 0.75rem 1rem; }
+.btn { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid $green; background: $green; color: #fff; cursor: pointer; font: inherit; }
+
+.card {
+  max-width: 720px; margin: 0 auto 2rem; background: #fff; border: 1px solid #d7e0da; border-radius: 8px;
+  padding: 1.5rem; color: #1f2a24;
+}
+
+.school {
+  display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid $green; padding-bottom: 0.75rem; margin-bottom: 1rem;
+  .logo { font-weight: 800; color: $green; font-size: 1.1rem; border: 2px solid $green; border-radius: 8px; padding: 0.4rem 0.6rem; }
+  &__info { flex: 1; position: relative; h1 { margin: 0; font-size: 1.25rem; color: $green; } p { margin: 0.1rem 0 0; color: #44514b; font-size: 0.9rem; } }
+  .tag { position: absolute; top: 0; right: 0; font-size: 0.68rem; letter-spacing: 0.08em; background: #e6f1ea; color: $green; padding: 0.15rem 0.5rem; border-radius: 4px; }
+}
+
+.student {
+  display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;
+  .photo { width: 70px; height: 70px; border-radius: 6px; object-fit: cover; background: #d6ead9; color: $green;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; }
+  dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 1.5rem; flex: 1; }
+  dl > div { display: flex; gap: 0.4rem; font-size: 0.88rem; }
+  dt { color: #6b7772; min-width: 70px; } dd { margin: 0; font-weight: 600; }
+}
+
+.marks {
+  width: 100%; border-collapse: collapse; margin-bottom: 1rem;
+  th, td { border: 1px solid #dde4e0; padding: 0.45rem 0.6rem; font-size: 0.88rem; text-align: left; }
+  th { background: #f1f6f3; color: #2f4f3e; }
+  tfoot td { font-weight: 700; background: #fafcfb; }
+  .pass { color: $green; } .fail { color: #b3261e; }
+}
+
+.summary {
+  display: flex; gap: 1.5rem; justify-content: flex-end; margin-bottom: 1.5rem;
+  div { text-align: right; } span { display: block; font-size: 0.72rem; color: #6b7772; } strong { font-size: 1.1rem; }
+  .pass { color: $green; } .fail { color: #b3261e; }
+}
+.draft { color: #8a5a00; font-size: 0.82rem; }
+
+.sign {
+  display: flex; justify-content: space-between; margin-top: 2.5rem;
+  div { border-top: 1px solid #333; padding-top: 0.3rem; font-size: 0.82rem; width: 160px; text-align: center; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .card { border: none; margin: 0; max-width: 100%; }
+}

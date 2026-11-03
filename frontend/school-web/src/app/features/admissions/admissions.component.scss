@@ -1,0 +1,31 @@
+.adm__header { display: flex; align-items: center; justify-content: space-between; }
+.muted { color: #6b7772; max-width: 720px; }
+.error { color: #b3261e; }
+
+.adm-form {
+  background: #fff; border: 1px solid #e0e4e2; border-radius: 8px; padding: 1.25rem; margin: 1rem 0;
+  max-width: 820px;
+  &__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 0.75rem; }
+}
+
+.field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem;
+  input, select { padding: 0.5rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; } }
+
+.toolbar { margin: 1rem 0; font-size: 0.9rem;
+  select { padding: 0.4rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; margin-left: 0.4rem; } }
+
+.btn { padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid #0f5132; background: #fff; color: #0f5132; cursor: pointer;
+  &--primary { background: #0f5132; color: #fff; } &:disabled { opacity: 0.6; } }
+
+.grid { width: 100%; max-width: 980px; border-collapse: collapse;
+  th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid #e0e4e2; font-size: 0.9rem; vertical-align: top; }
+  th { color: #44514b; } }
+
+.actions { display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start; }
+.link { background: none; border: none; color: #0f5132; cursor: pointer; font-size: 0.85rem; padding: 0; text-decoration: underline; }
+.stage-select { padding: 0.25rem 0.4rem; border: 1px solid #c9d3ce; border-radius: 5px; font-size: 0.8rem; }
+
+.badge { font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: #e7ece9; color: #44514b;
+  &--Admitted { background: #d6ead9; color: #0f5132; }
+  &--Rejected, &--Lost { background: #fde7e7; color: #b3261e; }
+  &--New { background: #e7effb; color: #1f6feb; } }

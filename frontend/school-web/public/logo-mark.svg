@@ -1,0 +1,6 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EduNestIO mark">
+  <rect width="40" height="40" rx="9" fill="#0f5132"/>
+  <path d="M20 10c-4 0-7 2-8.5 4.3C10 12 7 10.5 7 10.5V24c2.2 0 4.4 1 6 2.4C14.5 25 17 24 20 24V10z" fill="#ffffff"/>
+  <path d="M20 10c4 0 7 2 8.5 4.3C30 12 33 10.5 33 10.5V24c-2.2 0-4.4 1-6 2.4C25.5 25 23 24 20 24V10z" fill="#9fe3b8"/>
+  <path d="M9 27c3.2-2.2 8-2.2 11 0 3-2.2 7.8-2.2 11 0" stroke="#9fe3b8" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+</svg>

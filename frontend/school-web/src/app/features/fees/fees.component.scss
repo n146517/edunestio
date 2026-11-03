@@ -1,0 +1,35 @@
+.muted { color: #6b7772; max-width: 720px; }
+
+.tabs {
+  display: flex; gap: 0.25rem; border-bottom: 1px solid #e0e4e2; margin: 1rem 0 1.25rem; flex-wrap: wrap;
+  button { background: transparent; border: none; padding: 0.6rem 1rem; cursor: pointer; color: #44514b; font-size: 0.9rem; border-bottom: 2px solid transparent;
+    &.active { color: #0f5132; border-bottom-color: #0f5132; font-weight: 600; } &:hover { color: #0f5132; } }
+}
+
+.row-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1rem;
+  input, select { padding: 0.5rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; }
+  label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; } }
+
+.panel {
+  border: 1px solid #e0e4e2; border-radius: 8px; padding: 1rem; margin-top: 1rem; max-width: 560px;
+  display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+  legend { font-size: 0.85rem; color: #44514b; font-weight: 600; padding: 0 0.4rem; }
+  input, select { padding: 0.5rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; }
+}
+
+.totals {
+  display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; font-size: 0.9rem;
+  .bal strong { color: #b3261e; }
+}
+
+.btn { padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid #0f5132; background: #fff; color: #0f5132; cursor: pointer;
+  &--primary { background: #0f5132; color: #fff; } &:disabled { opacity: 0.6; } }
+
+.grid { width: 100%; max-width: 900px; border-collapse: collapse;
+  th, td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid #e0e4e2; font-size: 0.9rem; }
+  th { color: #44514b; } }
+
+.badge { font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: #e7ece9; color: #44514b;
+  &--Paid { background: #d6ead9; color: #0f5132; }
+  &--Partial { background: #fff3d6; color: #8a6100; }
+  &--Pending { background: #fde7e7; color: #b3261e; } }

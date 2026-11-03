@@ -1,0 +1,69 @@
+<section class="page">
+  <nav class="crumbs">My Assignments</nav>
+  <header class="head">
+    <div>
+      <h1>My Assignments</h1>
+      <p class="muted">Homework from your teachers. Submit your work and see your grades.</p>
+    </div>
+    @if (pendingCount()) { <span class="pending-chip">{{ pendingCount() }} pending</span> }
+  </header>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load your assignments.</p></div>
+  } @else if (!items().length) {
+    <div class="empty"><p class="muted">No assignments for your class yet. 🎉</p></div>
+  } @else {
+    <div class="cards">
+      @for (a of items(); track a.assignment_id) {
+        <div class="acard">
+          <div class="acard__top">
+            <span class="acard__subject">{{ a.subject_name ?? 'General' }}</span>
+            <span [class]="statusBadge(a)">{{ statusText(a) }}</span>
+          </div>
+          <h3 class="acard__title">{{ a.title }}</h3>
+          @if (a.description) { <p class="acard__desc">{{ a.description }}</p> }
+          <div class="acard__meta">
+            @if (a.teacher_name) { <span>👩‍🏫 {{ a.teacher_name }}</span> }
+            @if (a.due_date) { <span>· Due {{ a.due_date | date:'dd MMM yyyy' }}</span> }
+            @if (a.max_marks !== null) { <span>· {{ a.max_marks }} marks</span> }
+          </div>
+
+          @if (a.my_status === 'Graded') {
+            <div class="acard__graded">
+              <strong>Score: {{ a.my_marks !== null ? a.my_marks : '—' }}@if (a.max_marks !== null) { / {{ a.max_marks }} }</strong>
+              @if (a.my_feedback) { <span class="acard__fb">“{{ a.my_feedback }}”</span> }
+            </div>
+          }
+
+          <div class="acard__foot">
+            @if (a.my_submitted_at) {
+              <span class="acard__count">Submitted {{ a.my_submitted_at | date:'dd MMM, h:mm a' }}</span>
+            } @else {
+              <span class="acard__count acard__count--pending">Not submitted yet</span>
+            }
+            @if (a.my_status !== 'Graded') {
+              <button class="link-btn" (click)="openSubmit(a)">{{ a.submission_id ? 'Edit submission' : 'Submit' }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<!-- Submit dialog -->
+@if (submitOpen()) {
+  <div class="modal-backdrop" (click)="closeSubmit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Submit · {{ submitFor()?.title }}</h2>
+      <p class="muted">Write your answer, notes, or a link to your work.</p>
+      <textarea rows="6" [(ngModel)]="content" name="content" placeholder="Your submission…"></textarea>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closeSubmit()">Cancel</button>
+        <button class="btn btn--primary" (click)="submit()" [disabled]="busy()">{{ busy() ? 'Submitting…' : 'Submit' }}</button>
+      </div>
+    </div>
+  </div>
+}

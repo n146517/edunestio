@@ -1,0 +1,43 @@
+<section class="page">
+  <nav class="crumbs">My Timetable</nav>
+  <h1>My Timetable</h1>
+  <p class="muted">Your class's weekly periods — subject, teacher and time.</p>
+
+  @if (state() === 'loading') {
+    <p class="muted">Loading…</p>
+  } @else if (state() === 'error') {
+    <div class="empty"><p class="error">Could not load your timetable.</p></div>
+  } @else if (!slots().length) {
+    <div class="empty"><p class="muted">No timetable has been set for your class yet.</p></div>
+  } @else {
+    <div class="tt-wrap">
+      <table class="tt">
+        <thead>
+          <tr>
+            <th class="tt__corner">Day / Period</th>
+            @for (p of periods(); track p) { <th>P{{ p }}</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of days; track d.n) {
+            <tr>
+              <th class="tt__day">{{ d.label }}</th>
+              @for (p of periods(); track p) {
+                <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, p)">
+                  @if (slotAt(d.n, p); as s) {
+                    <span class="tt__subject">{{ s.subject_name ?? '—' }}</span>
+                    <span class="tt__teacher">{{ s.teacher_name ?? '' }}</span>
+                    @if (s.start_time) { <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span> }
+                    @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
+                  } @else {
+                    <span class="tt__empty">·</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

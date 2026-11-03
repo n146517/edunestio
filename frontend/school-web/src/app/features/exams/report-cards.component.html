@@ -1,0 +1,58 @@
+<section class="page">
+  <nav class="crumbs">Exams &amp; Report Cards <span>›</span> Report Cards</nav>
+  <app-exam-tabs />
+  <h1>Report Cards</h1>
+
+  <div class="selectors">
+    <label>Exam
+      <select [(ngModel)]="examId" (change)="onExamChange()">
+        <option [ngValue]="0">Select exam…</option>
+        @for (e of exams(); track e.exam_id) { <option [ngValue]="e.exam_id">{{ e.name }}</option> }
+      </select>
+    </label>
+    <label>Class
+      <select [(ngModel)]="classId" (change)="onClassChange()" [disabled]="!examId">
+        <option [ngValue]="0">Select class…</option>
+        @for (c of classesForExam(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+    <label>Section
+      <select [(ngModel)]="sectionId" [disabled]="!classId">
+        <option [ngValue]="0">All sections</option>
+        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+      </select>
+    </label>
+    <button class="btn btn--primary" (click)="generate()" [disabled]="!canGenerate()">Generate Report Cards</button>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Generating…</p>
+  } @else if (list(); as l) {
+    @if (!l.is_published) {
+      <div class="note">Results for this exam are not published yet. Report cards show current (draft) marks.</div>
+    }
+    <div class="tablewrap">
+      <table class="grid">
+        <thead>
+          <tr><th>#</th><th>Adm. No.</th><th>Student Name</th><th>%</th><th>Grade</th><th>Result</th><th>Card</th></tr>
+        </thead>
+        <tbody>
+          @for (r of l.items; track r.student_id) {
+            <tr>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ r.admission_number }}</td>
+              <td>{{ r.first_name }} {{ r.last_name }}</td>
+              <td>{{ r.percentage | number:'1.0-2' }}%</td>
+              <td>{{ r.grade ?? '—' }}</td>
+              <td><span [class]="resultClass(r.result)">{{ r.result }}</span></td>
+              <td><button class="act" (click)="viewCard(r.student_id)">View / Print</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Click <strong>View / Print</strong> to open a printable report card. Bulk PDF / ZIP download is planned.</p>
+  } @else {
+    <p class="muted">Select an exam and class, then Generate Report Cards.</p>
+  }
+</section>

@@ -1,0 +1,44 @@
+$green: #16a34a;
+$line: #e5e7eb;
+$muted: #6b7280;
+
+.crumbs { font-size: 0.8rem; color: $muted; margin-bottom: 0.5rem; }
+h1 { margin: 0 0 0.3rem; font-size: 1.4rem; }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.yearfilter {
+  display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: #475467;
+  select { padding: 0.5rem 0.65rem; border: 1px solid #cbd2db; border-radius: 9px; font: inherit; min-width: 150px;
+    &:focus { outline: none; border-color: $green; box-shadow: 0 0 0 3px rgba(22,163,74,0.14); } }
+}
+.muted { color: $muted; }
+.error { color: #b3261e; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem; }
+
+.att-cards {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem 0;
+  @media (max-width: 760px) { grid-template-columns: repeat(2, 1fr); }
+}
+.att-card {
+  background: #fff; border: 1px solid $line; border-radius: 12px; padding: 0.8rem 0.9rem;
+  span { display: block; font-size: 0.72rem; color: $muted; text-transform: uppercase; letter-spacing: 0.02em; }
+  strong { font-size: 1.5rem; color: #111827; }
+  &--ok strong { color: #166534; }
+  &--bad strong { color: #b91c1c; }
+  &--warn strong { color: #b45309; }
+  &--leave strong { color: #1d4ed8; }
+}
+
+.card { background: #fff; border: 1px solid $line; border-radius: 14px; padding: 1.1rem 1.2rem; box-shadow: 0 1px 2px rgba(16,24,40,0.03);
+  h2 { margin: 0 0 0.9rem; font-size: 1.02rem; font-weight: 700; } }
+.tablewrap { overflow-x: auto; }
+.tbl {
+  width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 520px;
+  th, td { text-align: left; padding: 0.55rem 0.65rem; border-bottom: 1px solid #f1f3f5; }
+  th { color: $muted; font-weight: 600; background: #f8fafc; white-space: nowrap; }
+}
+
+.pill { font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 999px; font-weight: 600; background: #f3f4f6; color: #6b7280;
+  &--pass { background: #dcfce7; color: #166534; } &--fail { background: #fee2e2; color: #b91c1c; } }
+.badge { font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 999px; font-weight: 600; display: inline-block;
+  &--late { background: #fef3c7; color: #92400e; } &--leave { background: #dbeafe; color: #1d4ed8; } }

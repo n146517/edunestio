@@ -1,0 +1,30 @@
+<section class="page">
+  <nav class="crumbs"><a routerLink="/leave/mine">My Leaves</a> <span>›</span> Apply</nav>
+  <h1>Apply for Leave</h1>
+  <p class="muted">Submit a leave request. Your school staff will review and approve or reject it.</p>
+
+  <div class="card form-card">
+    <div class="form-grid">
+      <label>From date <span class="req">*</span>
+        <input type="date" [(ngModel)]="fromDate" name="fromDate" />
+      </label>
+      <label>To date <span class="req">*</span>
+        <input type="date" [(ngModel)]="toDate" name="toDate" />
+      </label>
+      <label>Leave type
+        <select [(ngModel)]="leaveType" name="leaveType">
+          @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+        </select>
+      </label>
+      <label class="span-2">Reason <span class="req">*</span>
+        <textarea rows="3" [(ngModel)]="reason" name="reason" placeholder="Describe the reason for leave"></textarea>
+      </label>
+    </div>
+    <div class="actions">
+      <a class="btn btn--ghost" routerLink="/leave/mine">Cancel</a>
+      <button class="btn btn--primary" (click)="submit()" [disabled]="busy()">
+        {{ busy() ? 'Submitting…' : 'Submit Request' }}
+      </button>
+    </div>
+  </div>
+</section>

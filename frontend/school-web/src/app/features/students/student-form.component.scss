@@ -1,0 +1,64 @@
+$green: #16a34a;
+$green-dark: #0f5132;
+$ink: #1f2a37;
+$muted: #667085;
+$line: #d7dce3;
+$shadow: 0 1px 3px rgba(16,24,40,0.08), 0 1px 2px rgba(16,24,40,0.04);
+
+:host { display: block; color: $ink; }
+
+/* Back link hugs the left edge; the heading + form card are centered. */
+.back {
+  display: inline-flex; align-items: center; gap: 0.3rem; color: $green; text-decoration: none;
+  font-size: 0.84rem; font-weight: 600; margin-bottom: 0.9rem;
+  &:hover { text-decoration: underline; }
+}
+.page__head { margin: 0 auto 1.2rem; max-width: 980px; width: 100%; }
+h1 { margin: 0.5rem 0 0.25rem; font-size: 1.6rem; font-weight: 700; color: #0f172a; }
+.muted { color: $muted; }
+
+.form { display: flex; flex-direction: column; gap: 1.1rem; max-width: 980px; margin: 0 auto; width: 100%; }
+
+/* ===== Section cards ===== */
+.section {
+  border: 1px solid $line; border-radius: 16px; background: #fff; box-shadow: $shadow;
+  overflow: hidden;
+  &__title {
+    margin: 0; font-weight: 700; color: #0f172a; font-size: 0.98rem;
+    padding: 0.9rem 1.2rem; background: #f6faf7; border-bottom: 1px solid $line;
+  }
+  .grid { padding: 1.2rem; }
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem 1rem; }
+
+label {
+  display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; font-weight: 600; color: #475467;
+  &.req::after { content: ' *'; color: #dc2626; }
+  &.wide { grid-column: 1 / -1; }
+  input, select {
+    padding: 0.6rem 0.7rem; border: 1px solid #cbd2db; border-radius: 10px; font: inherit; color: $ink;
+    background: #fff; transition: border-color 0.12s, box-shadow 0.12s;
+    &:focus { outline: none; border-color: $green; box-shadow: 0 0 0 3px rgba(22,163,74,0.14); }
+    &::placeholder { color: #9aa4b2; }
+  }
+  select:disabled { background: #f3f4f6; opacity: 0.7; }
+}
+.err { color: #dc2626; font-size: 0.74rem; font-weight: 600; }
+
+/* ===== Sticky action bar ===== */
+.form__actions {
+  position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 0.6rem;
+  padding: 0.9rem 1rem; margin: 0 -0.2rem; border-radius: 14px;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(6px);
+  border: 1px solid $line; box-shadow: 0 -2px 12px rgba(16,24,40,0.06);
+}
+.btn {
+  padding: 0.6rem 1.3rem; border-radius: 10px; border: 1px solid $line; background: #fff; color: $ink;
+  cursor: pointer; font: inherit; font-weight: 700; font-size: 0.88rem; transition: all 0.12s ease;
+  &--primary { background: $green; color: #fff; border-color: $green;
+    box-shadow: 0 2px 10px rgba(22,163,74,0.3);
+    &:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); } }
+  &--ghost { border-color: $line; color: #475467; &:hover:not(:disabled) { background: #f9fafb; } }
+  &:disabled { opacity: 0.6; cursor: default; }
+}

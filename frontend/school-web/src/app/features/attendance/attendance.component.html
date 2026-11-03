@@ -1,0 +1,132 @@
+<section class="page">
+  <header class="head">
+    <div>
+      <h1>Attendance</h1>
+      <p class="muted">
+        @if (isSubjectMode()) {
+          Subject-wise attendance — mark each period/subject for the class.
+        } @else {
+          Daily attendance — one record per student per day.
+        }
+      </p>
+    </div>
+    <span class="mode-chip" [class.mode-chip--subject]="isSubjectMode()">
+      {{ isSubjectMode() ? 'Subject-wise' : 'Daily' }} mode
+    </span>
+  </header>
+
+  <!-- Selectors -->
+  <div class="selectors">
+    <label>Class
+      <select [(ngModel)]="classId" (change)="onClassChange()">
+        <option [ngValue]="0">Select…</option>
+        @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+    <label>Section
+      <select [(ngModel)]="sectionId" [disabled]="!classId">
+        <option [ngValue]="0">All sections</option>
+        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+      </select>
+    </label>
+    @if (isSubjectMode()) {
+      <label>Subject
+        <select [(ngModel)]="subjectId">
+          <option [ngValue]="0">Select…</option>
+          @for (sub of subjects(); track sub.subject_id) { <option [ngValue]="sub.subject_id">{{ sub.name }}</option> }
+        </select>
+      </label>
+    }
+    <label>Date <input type="date" [(ngModel)]="date" /></label>
+    <button class="btn btn--primary" (click)="loadSheet()" [disabled]="!canLoad()">Load sheet</button>
+  </div>
+
+  @switch (state()) {
+    @case ('loading') { <p class="muted">Loading roster…</p> }
+    @case ('error') { <p class="error">Failed to load the attendance sheet.</p> }
+    @case ('idle') {
+      <div class="empty">
+        <p class="muted">Select a class{{ isSubjectMode() ? ', subject' : '' }} and date, then load the sheet.</p>
+      </div>
+    }
+    @case ('success') {
+      @if (rows().length === 0) {
+        <div class="empty"><p class="muted">No active students for this selection. Try “All sections”.</p></div>
+      } @else {
+        <!-- Summary cards -->
+        @if (alreadyMarked()) {
+          <div class="marked-banner">
+            <span class="marked-banner__ic">✓</span>
+            <span>Attendance for <strong>{{ date | date:'dd MMM yyyy' }}</strong> is already saved
+              ({{ markedCount() }} of {{ summary().total }} marked). You're viewing the saved record —
+              change any status and click <strong>Update</strong> to correct it.</span>
+          </div>
+        }
+
+        <div class="att-cards">
+          <div class="att-card att-card--pct"><span>Present</span><strong>{{ summary().pct }}%</strong></div>
+          <div class="att-card att-card--ok"><span>Present</span><strong>{{ summary().present }}</strong></div>
+          <div class="att-card att-card--bad"><span>Absent</span><strong>{{ summary().absent }}</strong></div>
+          <div class="att-card att-card--warn"><span>Late</span><strong>{{ summary().late }}</strong></div>
+          <div class="att-card att-card--leave"><span>Leave</span><strong>{{ summary().leave }}</strong></div>
+        </div>
+
+        @if (canMark) {
+          <div class="bulkbar">
+            <span class="bulkbar__label">Mark all as</span>
+            @for (s of statuses; track s) {
+              <button class="chip" [class]="statusClass(s)" (click)="markAll(s)">{{ s }}</button>
+            }
+            <span class="bulkbar__count">{{ summary().total }} students</span>
+          </div>
+        }
+
+        <div class="tablewrap">
+          <table class="grid">
+            <thead>
+              <tr><th>#</th><th>Roll</th><th>Adm. No.</th><th>Student</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (r of rows(); track r.student_id; let i = $index) {
+                <tr [class.row--marked]="r.marked">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ r.roll_number ?? '—' }}</td>
+                  <td>{{ r.admission_number }}</td>
+                  <td class="name">{{ r.first_name }} {{ r.last_name }}</td>
+                  <td>
+                    @if (canMark && !r.on_leave) {
+                      <div class="statusbtns">
+                        @for (s of statuses; track s) {
+                          <button class="st-btn" [class]="statusClass(s)" [class.active]="r.status === s"
+                                  (click)="setStatus(r, s)">{{ s }}</button>
+                        }
+                      </div>
+                    } @else if (r.on_leave) {
+                      <div class="leave-lock">
+                        <span class="chip st--leave">Leave</span>
+                        <span class="leave-lock__note">🔒 On approved leave</span>
+                      </div>
+                    } @else {
+                      <span class="chip" [class]="statusClass(r.status)">{{ r.status }}</span>
+                    }
+                  </td>
+                  <td class="savedcell">
+                    @if (r.marked) { <span class="saved-tag" title="Saved for this date">✓ Saved</span> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (canMark) {
+          <div class="savebar">
+            <button class="btn btn--primary" [disabled]="saving()" (click)="save()">
+              {{ saving() ? 'Saving…' : (alreadyMarked() ? 'Update Attendance' : 'Save Attendance') }}
+            </button>
+          </div>
+        }
+      }
+    }
+  }
+</section>

@@ -1,0 +1,44 @@
+<h1>Dashboard</h1>
+<p class="muted">Signed in as {{ store.fullName() ?? store.username() }} — {{ store.tenantName() ?? 'Platform' }}</p>
+
+<section class="card">
+  <h2>API status</h2>
+
+  @switch (state()) {
+    @case ('loading') {
+      <p>Checking API…</p>
+    }
+    @case ('success') {
+      <dl class="status">
+        <div><dt>Status</dt><dd class="ok">{{ status()?.status }}</dd></div>
+        <div><dt>Service</dt><dd>{{ status()?.service }}</dd></div>
+        <div><dt>Server time (UTC)</dt><dd>{{ status()?.server_time_utc }}</dd></div>
+      </dl>
+    }
+    @case ('error') {
+      <p class="error">Could not reach the API.</p>
+      <button type="button" class="btn" (click)="loadStatus()">Retry</button>
+    }
+  }
+</section>
+
+<section class="card">
+  <h2>Your access</h2>
+  <p><strong>Tenant:</strong> {{ store.tenantName() ?? 'platform (no tenant)' }} (#{{ store.tenantId() }})</p>
+  <p><strong>Roles:</strong> {{ store.roles().join(', ') || 'none' }}</p>
+  <p><strong>Permissions:</strong> {{ store.permissions().join(', ') || 'none' }}</p>
+</section>
+
+<h2 class="section-title">Modules</h2>
+<div class="module-grid">
+  @for (m of modules; track m.label) {
+    <a class="module-card" [routerLink]="m.route" [class.module-card--planned]="m.planned">
+      <img class="module-card__icon" [src]="m.icon" alt="" width="28" height="28" />
+      <div class="module-card__body">
+        <div class="module-card__title">{{ m.label }}</div>
+        <div class="module-card__desc">{{ m.desc }}</div>
+      </div>
+      @if (m.planned) { <span class="module-card__badge">soon</span> }
+    </a>
+  }
+</div>

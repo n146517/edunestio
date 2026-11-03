@@ -1,0 +1,94 @@
+<section class="page">
+  <nav class="crumbs">Academics <span>›</span> Timetable</nav>
+  <header class="head">
+    <div>
+      <h1>Timetable</h1>
+      <p class="muted">Weekly periods for a class/section — set the subject and teacher for each slot.</p>
+    </div>
+  </header>
+
+  <div class="selectors">
+    <label>Class
+      <select [(ngModel)]="classId" (change)="onClassChange()">
+        <option [ngValue]="0">Select…</option>
+        @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+      </select>
+    </label>
+    <label>Section
+      <select [(ngModel)]="sectionId" (change)="onSectionChange()" [disabled]="!classId">
+        <option [ngValue]="0">All sections</option>
+        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+      </select>
+    </label>
+    @if (canManage && classId) { <span class="hint">Tip: click any cell to set / edit that period.</span> }
+  </div>
+
+  @if (!classId) {
+    <div class="empty"><p class="muted">Pick a class to view or build its timetable.</p></div>
+  } @else if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else {
+    <div class="tt-wrap">
+      <table class="tt">
+        <thead>
+          <tr>
+            <th class="tt__corner">Day / Period</th>
+            @for (p of periods; track p) { <th>P{{ p }}</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of days; track d.n) {
+            <tr>
+              <th class="tt__day">{{ d.label }}</th>
+              @for (p of periods; track p) {
+                <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, p)"
+                    [class.tt__cell--click]="canManage" (click)="openEditor(d.n, p)">
+                  @if (slotAt(d.n, p); as s) {
+                    <span class="tt__subject">{{ s.subject_name ?? 'Subject?' }}</span>
+                    <span class="tt__teacher">{{ s.teacher_name ?? '—' }}</span>
+                    @if (s.start_time) { <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span> }
+                    @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
+                  } @else {
+                    <span class="tt__empty">@if (canManage) { + }</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<!-- Slot editor -->
+@if (editorOpen()) {
+  <div class="modal-backdrop" (click)="closeEditor()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Period {{ editPeriod }} · {{ days[editDay - 1].label }}</h2>
+      <label>Subject
+        <select [(ngModel)]="formSubjectId" name="subj">
+          <option [ngValue]="0">—</option>
+          @for (s of subjects(); track s.subject_id) { <option [ngValue]="s.subject_id">{{ s.name }}</option> }
+        </select>
+      </label>
+      <label>Teacher
+        <select [(ngModel)]="formTeacherId" name="tch">
+          <option [ngValue]="0">—</option>
+          @for (t of teachers(); track t.user_id) { <option [ngValue]="t.user_id">{{ t.full_name }}</option> }
+        </select>
+      </label>
+      <div class="row2">
+        <label>Start time <input type="time" [(ngModel)]="formStart" name="st" /></label>
+        <label>End time <input type="time" [(ngModel)]="formEnd" name="et" /></label>
+      </div>
+      <label>Room (optional) <input type="text" [(ngModel)]="formRoom" name="rm" placeholder="e.g. 204" /></label>
+      <div class="modal__actions">
+        @if (editSlotId) { <button class="btn btn--danger-outline" (click)="deleteSlot()" [disabled]="busy()">Clear</button> }
+        <span class="spacer"></span>
+        <button class="btn btn--ghost" (click)="closeEditor()">Cancel</button>
+        <button class="btn btn--primary" (click)="saveSlot()" [disabled]="busy()">{{ busy() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}

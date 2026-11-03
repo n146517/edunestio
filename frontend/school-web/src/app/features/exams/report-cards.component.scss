@@ -1,0 +1,24 @@
+$green: #0f5132;
+$border: #e0e4e2;
+
+.crumbs { font-size: 0.78rem; color: #8a938e; margin-bottom: 0.4rem; span { margin: 0 0.3rem; } }
+h1 { margin: 0 0 1rem; }
+.muted { color: #6b7772; } .hint { color: #8a938e; font-size: 0.8rem; margin-top: 0.5rem; }
+.note { background: #fdf6e3; border: 1px solid #f0e2bf; color: #8a5a00; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.85rem; margin-bottom: 1rem; }
+
+.selectors {
+  display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem;
+  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; color: #44514b; }
+  select { padding: 0.5rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; font: inherit; min-width: 170px; }
+}
+.btn { padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid $green; background: #fff; color: $green; cursor: pointer; font: inherit;
+  &--primary { background: $green; color: #fff; } &:disabled { opacity: 0.55; } }
+
+.tablewrap { overflow-x: auto; border: 1px solid $border; border-radius: 10px; background: #fff; }
+.grid {
+  width: 100%; border-collapse: collapse; min-width: 640px;
+  th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid $border; font-size: 0.88rem; }
+  th { color: #44514b; background: #f7faf8; }
+}
+.act { background: #f4f7f5; border: 1px solid #d7e0da; border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.78rem; color: #2f4f3e; cursor: pointer; &:hover { background: #e8f0ea; } }
+.res { font-weight: 600; &--pass { color: $green; } &--fail { color: #b3261e; } }

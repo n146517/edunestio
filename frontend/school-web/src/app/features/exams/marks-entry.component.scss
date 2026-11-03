@@ -1,0 +1,49 @@
+$green: #0f5132;
+$border: #e0e4e2;
+
+.crumbs { font-size: 0.78rem; color: #8a938e; margin-bottom: 0.4rem; span { margin: 0 0.3rem; } }
+h1 { margin: 0 0 1rem; }
+.muted { color: #6b7772; }
+
+.selectors {
+  display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem;
+  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.82rem; color: #44514b; }
+  select { padding: 0.5rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; font: inherit; min-width: 170px; }
+}
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;
+  .spacer { flex: 1; }
+  .roster-search { padding: 0.45rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 6px; font: inherit; min-width: 240px; }
+}
+
+.btn {
+  padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid $green; background: #fff; color: $green; cursor: pointer; font: inherit; white-space: nowrap;
+  &--primary { background: $green; color: #fff; }
+  &--ghost { border-color: #c9d3ce; color: #44514b; }
+  &:disabled { opacity: 0.55; }
+}
+
+.tablewrap { overflow-x: auto; border: 1px solid $border; border-radius: 10px; background: #fff; }
+.tablewrap--scroll { max-height: 320px; overflow-y: auto; margin-top: 0.5rem; }
+.grid {
+  width: 100%; border-collapse: collapse; min-width: 640px;
+  th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid $border; font-size: 0.88rem; }
+  th { color: #44514b; background: #f7faf8; position: sticky; top: 0; }
+}
+.mark { width: 90px; padding: 0.35rem 0.5rem; border: 1px solid #c9d3ce; border-radius: 6px; font: inherit; }
+.absent { font-size: 0.78rem; color: #6b7772; margin-left: 0.6rem; }
+
+.badge { font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 10px; background: #eef1ef; color: #556;
+  &--entered { background: #d6ead9; color: $green; }
+  &--absent { background: #fdecd4; color: #8a5a00; } }
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+.modal {
+  background: #fff; border-radius: 12px; padding: 1.25rem; width: 560px; max-width: 100%; display: flex; flex-direction: column; gap: 0.75rem;
+  h2 { margin: 0; font-size: 1.1rem; }
+  &__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+}
+.upload { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.summary { display: flex; gap: 0.5rem; }
+.chip { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 10px;
+  &--ok { background: #d6ead9; color: $green; } &--bad { background: #fde4e2; color: #b3261e; } }

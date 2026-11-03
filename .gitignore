@@ -1,0 +1,33 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+artifacts/
+.vs/
+
+# EF Core generated SQL kept, but local DB dumps ignored
+deploy/local/*.local.sql
+
+# ---- Node / Angular ----
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+coverage/
+
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
+*.pfx
+appsettings.*.local.json
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local environment-specific settings (may contain secrets like the DB password)
+**/config/appsettings.Development.json
+**/config/appsettings.Local.json
