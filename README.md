@@ -81,12 +81,14 @@ npm start           # http://localhost:4200
 
 ### Demo accounts (development seed; password = your `Seed__DemoUserPassword`)
 
-| Username | Role | Tenant |
-|----------|------|--------|
-| superadmin | SaaSSuperAdmin | platform |
-| riverdale.admin | SchoolAdmin | Riverdale (1) |
-| riverdale.teacher | Teacher (view only) | Riverdale (1) |
-| hillside.admin | SchoolAdmin | Hillside (2) |
+| Username | Role | Password | Tenant |
+|----------|------|----------|--------|
+| superadmin | SaaSSuperAdmin | `Demo@12345` | platform |
+| riverdale.admin | SchoolAdmin | `Demo@12345` | Riverdale (1) |
+| riverdale.teacher | Teacher (view only) | `Demo@12345` | Riverdale (1) |
+| hillside.admin | SchoolAdmin | `Demo@12345` | Hillside (2) |
+
+See also [`docs/test-logins.md`](docs/test-logins.md).
 
 Sign in as `riverdale.admin` vs `hillside.admin` to see tenant isolation — each only sees its own students.
 
