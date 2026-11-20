@@ -15,24 +15,35 @@
         <thead>
           <tr>
             <th class="tt__corner">Day / Period</th>
-            @for (p of periods(); track p) { <th>P{{ p }}</th> }
+            @for (c of columns(); track $index) {
+              <th [class.tt__th--gap]="c.kind !== 'Period'">
+                {{ c.label }}
+                @if (colTime(c)) { <span class="tt__thtime">{{ colTime(c) }}</span> }
+              </th>
+            }
           </tr>
         </thead>
         <tbody>
           @for (d of days; track d.n) {
             <tr>
               <th class="tt__day">{{ d.label }}</th>
-              @for (p of periods(); track p) {
-                <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, p)">
-                  @if (slotAt(d.n, p); as s) {
-                    <span class="tt__subject">{{ s.subject_name ?? '—' }}</span>
-                    <span class="tt__teacher">{{ s.teacher_name ?? '' }}</span>
-                    @if (s.start_time) { <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span> }
-                    @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
-                  } @else {
-                    <span class="tt__empty">·</span>
-                  }
-                </td>
+              @for (c of columns(); track $index) {
+                @if (c.kind !== 'Period') {
+                  <td class="tt__cell tt__cell--gap" [attr.aria-label]="c.label"><span>{{ c.label }}</span></td>
+                } @else {
+                  <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, c.period_no)">
+                    @if (slotAt(d.n, c.period_no); as s) {
+                      <span class="tt__subject">{{ s.subject_name ?? '—' }}</span>
+                      <span class="tt__teacher">{{ s.teacher_name ?? '' }}</span>
+                      @if (!colTime(c) && s.start_time) {
+                        <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span>
+                      }
+                      @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
+                    } @else {
+                      <span class="tt__empty">·</span>
+                    }
+                  </td>
+                }
               }
             </tr>
           }

@@ -14,3 +14,19 @@ public class TimetableSlotVO
     public long? TeacherId { get; set; }
     public string? Room { get; set; }
 }
+
+/// <summary>One row of a class's day structure.</summary>
+public class PeriodScheduleItemVO
+{
+    public string Kind { get; set; } = "Period";   // Period | Break | Lunch
+    public string? Label { get; set; }
+    public string? StartTime { get; set; }          // "HH:mm"
+    public string? EndTime { get; set; }
+}
+
+/// <summary>Replace a class's period / break / lunch structure.</summary>
+public class PeriodScheduleVO
+{
+    public long ClassId { get; set; }
+    public List<PeriodScheduleItemVO>? Items { get; set; }
+}

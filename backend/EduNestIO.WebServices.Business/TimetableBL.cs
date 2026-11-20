@@ -54,6 +54,42 @@ public class TimetableBL
         finally { ReleaseDBObject(da); }
     }
 
+    public DbResult ScheduleGet(int tenantId, long classId)
+    {
+        TimetableDA? da = null;
+        try { da = Da(); return da.ScheduleGet(tenantId, classId); }
+        finally { ReleaseDBObject(da); }
+    }
+
+    public DbResult ScheduleSave(int tenantId, PeriodScheduleVO vo)
+    {
+        TimetableDA? da = null;
+        try
+        {
+            da = Da();
+            var payload = new
+            {
+                class_id = vo.ClassId,
+                items = (vo.Items ?? new()).Select(i => new
+                {
+                    kind = i.Kind,
+                    label = i.Label,
+                    start_time = i.StartTime,
+                    end_time = i.EndTime
+                }).ToList()
+            };
+            return da.ScheduleSave(tenantId, payload);
+        }
+        finally { ReleaseDBObject(da); }
+    }
+
+    public DbResult TeacherSchedule(int tenantId, long teacherId)
+    {
+        TimetableDA? da = null;
+        try { da = Da(); return da.TeacherSchedule(tenantId, teacherId); }
+        finally { ReleaseDBObject(da); }
+    }
+
     public DbResult Teachers(int tenantId)
     {
         TimetableDA? da = null;

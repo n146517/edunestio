@@ -23,6 +23,17 @@ public class TimetableDA : DBBase
         DAHelper.ExecuteTenantJson(DbMaster, "academics.fn_timetable_delete", tenantId,
             new { slot_id = slotId });
 
+    public DbResult ScheduleGet(int tenantId, long classId) =>
+        DAHelper.ExecuteTenantJson(DbMaster, "academics.fn_period_schedule_get", tenantId,
+            new { class_id = classId });
+
+    public DbResult ScheduleSave(int tenantId, object payload) =>
+        DAHelper.ExecuteTenantJson(DbMaster, "academics.fn_period_schedule_save", tenantId, payload);
+
+    public DbResult TeacherSchedule(int tenantId, long teacherId) =>
+        DAHelper.ExecuteTenantJson(DbMaster, "academics.fn_teacher_schedule", tenantId,
+            new { teacher_id = teacherId });
+
     public DbResult Teachers(int tenantId) =>
         DAHelper.ExecuteTenantJson(DbMaster, "core.fn_teacher_list", tenantId, new { });
 }

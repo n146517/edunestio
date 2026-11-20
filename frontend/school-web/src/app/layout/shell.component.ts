@@ -31,8 +31,8 @@ export class ShellComponent {
   protected readonly store = inject(AuthStore);
   protected readonly yearStore = inject(AcademicYearStore);
 
-  /** Staff see the global academic-year switcher; students/guardians do not. */
-  protected readonly showYearPicker = !this.store.isStudentOrGuardian();
+  /** Everyone (staff, students, guardians) gets the global academic-year switcher. */
+  protected readonly showYearPicker = true;
 
   constructor() {
     if (this.showYearPicker) this.yearStore.load();

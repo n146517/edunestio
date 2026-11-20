@@ -1,37 +1,33 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AttendanceService } from '../../core/services/attendance.service';
-import { AcademicService } from '../../core/services/academic.service';
 import { AuthStore } from '../../core/auth/auth.store';
-import { AcademicYear, AttendanceHistoryRow } from '../../core/models/api.models';
+import { AcademicYearStore } from '../../core/state/academic-year.store';
+import { AttendanceHistoryRow } from '../../core/models/api.models';
 
 type LoadState = 'loading' | 'success' | 'error' | 'nostudent';
 
 /** Student self-service: my own attendance history + summary, filterable by academic year. */
 @Component({
   selector: 'app-my-attendance',
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe],
   templateUrl: './my-attendance.component.html',
   styleUrl: './my-attendance.component.scss'
 })
 export class MyAttendanceComponent {
   private readonly api = inject(AttendanceService);
-  private readonly academic = inject(AcademicService);
   private readonly store = inject(AuthStore);
 
   protected readonly state = signal<LoadState>('loading');
   /** All fetched rows (across years). */
   private readonly allRows = signal<AttendanceHistoryRow[]>([]);
-  protected readonly years = signal<AcademicYear[]>([]);
-  /** Selected academic year id; 0 = all years. */
-  protected yearId = 0;
+  private readonly yearStore = inject(AcademicYearStore);
 
-  /** Rows filtered to the selected academic year's date range. */
+  /** Rows filtered to the header-selected academic year's date range. */
   protected readonly rows = computed(() => {
     const all = this.allRows();
-    const y = this.years().find((x) => x.academic_year_id === this.yearId);
-    if (!y) return all; // 0 / All years
+    const y = this.yearStore.selected();
+    if (!y) return all; // All years
     const from = y.start_date?.substring(0, 10) ?? '';
     const to = y.end_date?.substring(0, 10) ?? '';
     return all.filter((r) => {
@@ -52,12 +48,6 @@ export class MyAttendanceComponent {
   constructor() {
     const sid = this.store.studentId();
     if (!sid) { this.state.set('nostudent'); return; }
-    // Years for the filter; default to the current year if there is one.
-    this.academic.listYears().subscribe((ys) => {
-      this.years.set(ys);
-      const current = ys.find((y) => y.is_current);
-      if (current) this.yearId = current.academic_year_id;
-    });
     this.load(sid);
   }
 

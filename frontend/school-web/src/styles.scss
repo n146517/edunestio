@@ -15,14 +15,17 @@ body {
 
 /* Default the app to a compact 80% scale (same look as browser zoom 80%).
    Users can still zoom further with the browser if they want. */
+:root {
+  --app-zoom: 0.8;   // keep in sync with body zoom; viewport units are NOT scaled by zoom
+}
 body {
-  zoom: 0.8;
+  zoom: var(--app-zoom);
 }
 
 /* On phones/tablets the 80% compaction hurts readability and the layout already
    reflows to a single column, so render at full scale there. */
 @media (max-width: 900px) {
-  body { zoom: 1; }
+  :root { --app-zoom: 1; }
 }
 
 h1 {

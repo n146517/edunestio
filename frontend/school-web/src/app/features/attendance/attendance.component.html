@@ -71,28 +71,60 @@
           <div class="att-card att-card--leave"><span>Leave</span><strong>{{ summary().leave }}</strong></div>
         </div>
 
-        @if (canMark) {
-          <div class="bulkbar">
+        <div class="bulkbar">
+          @if (canMark) {
             <span class="bulkbar__label">Mark all as</span>
             @for (s of statuses; track s) {
               <button class="chip" [class]="statusClass(s)" (click)="markAll(s)">{{ s }}</button>
             }
-            <span class="bulkbar__count">{{ summary().total }} students</span>
+          }
+          <input type="search" class="bulkbar__search" placeholder="Search name, roll or adm. no."
+                 [ngModel]="search()" (ngModelChange)="search.set($event)" aria-label="Search students" />
+          <span class="bulkbar__count">
+            @if (search().trim()) { {{ visibleRows().length }} of }{{ summary().total }} students
+          </span>
+        </div>
+
+        @if (canMark && selectedCount() > 0) {
+          <div class="selbar">
+            <strong>{{ selectedCount() }} selected</strong>
+            <span class="bulkbar__label">Mark selected as</span>
+            @for (s of statuses; track s) {
+              <button class="chip" [class]="statusClass(s)" (click)="markSelected(s)">{{ s }}</button>
+            }
+            <button class="link-btn" (click)="clearSelection()">Clear</button>
           </div>
         }
 
         <div class="tablewrap">
           <table class="grid">
             <thead>
-              <tr><th>#</th><th>Roll</th><th>Adm. No.</th><th>Student</th><th>Status</th><th></th></tr>
+              <tr>
+                <th class="chk">
+                  @if (canMark) {
+                    <input type="checkbox" [checked]="allVisibleSelected()" (change)="toggleAllVisible()"
+                           aria-label="Select all shown students" />
+                  }
+                </th>
+                <th>#</th><th>Roll</th><th>Adm. No.</th><th>Student</th><th>Status</th><th></th>
+              </tr>
             </thead>
             <tbody>
-              @for (r of rows(); track r.student_id; let i = $index) {
-                <tr [class.row--marked]="r.marked">
+              @for (r of visibleRows(); track r.student_id; let i = $index) {
+                <tr [class.row--marked]="r.marked" [class.row--selected]="selected().has(r.student_id)">
+                  <td class="chk">
+                    @if (canMark) {
+                      <input type="checkbox" [checked]="selected().has(r.student_id)" [disabled]="r.on_leave"
+                             (change)="toggleOne(r)" [attr.aria-label]="'Select ' + r.first_name" />
+                    }
+                  </td>
                   <td>{{ i + 1 }}</td>
                   <td>{{ r.roll_number ?? '—' }}</td>
                   <td>{{ r.admission_number }}</td>
-                  <td class="name">{{ r.first_name }} {{ r.last_name }}</td>
+                  <td class="name">
+                    {{ r.first_name }} {{ r.last_name }}
+                    <button type="button" class="month-btn" (click)="openMonth(r)" title="View monthly attendance">📅 Month</button>
+                  </td>
                   <td>
                     @if (canMark && !r.on_leave) {
                       <div class="statusbtns">
@@ -117,6 +149,9 @@
               }
             </tbody>
           </table>
+          @if (!visibleRows().length) {
+            <p class="muted nomatch">No student matches “{{ search() }}”.</p>
+          }
         </div>
 
         @if (canMark) {
@@ -130,3 +165,47 @@
     }
   }
 </section>
+
+<!-- Monthly attendance for one student -->
+@if (monthOpen()) {
+  <div class="modal-backdrop" (click)="closeMonth()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <h2>{{ monthStudent()?.first_name }} {{ monthStudent()?.last_name }} · Monthly attendance</h2>
+        <button class="link-btn" (click)="closeMonth()" aria-label="Close">✕</button>
+      </div>
+      <label class="modal__month">Month
+        <input type="month" [ngModel]="month()" (ngModelChange)="month.set($event)" />
+      </label>
+
+      <div class="att-cards att-cards--sm">
+        <div class="att-card att-card--pct"><span>Present</span><strong>{{ monthSummary().pct }}%</strong></div>
+        <div class="att-card att-card--ok"><span>Present</span><strong>{{ monthSummary().present }}</strong></div>
+        <div class="att-card att-card--bad"><span>Absent</span><strong>{{ monthSummary().absent }}</strong></div>
+        <div class="att-card att-card--warn"><span>Late</span><strong>{{ monthSummary().late }}</strong></div>
+        <div class="att-card att-card--leave"><span>Leave</span><strong>{{ monthSummary().leave }}</strong></div>
+      </div>
+
+      @if (monthLoading()) {
+        <p class="muted">Loading…</p>
+      } @else if (!monthRows().length) {
+        <p class="muted">No attendance records for this month.</p>
+      } @else {
+        <div class="modal__list">
+          <table class="grid">
+            <thead><tr><th>Date</th><th>Status</th><th>Remark</th></tr></thead>
+            <tbody>
+              @for (a of monthRows(); track a.attend_date) {
+                <tr>
+                  <td>{{ a.attend_date | date:'EEE, dd MMM yyyy' }}</td>
+                  <td><span class="chip" [class]="statusClass(a.status)">{{ a.status }}</span></td>
+                  <td>{{ a.remark ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+}

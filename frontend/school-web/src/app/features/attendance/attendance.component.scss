@@ -118,3 +118,40 @@ $shadow: 0 1px 3px rgba(16,24,40,0.08), 0 1px 2px rgba(16,24,40,0.04);
   position: sticky; bottom: 0; margin-top: 1rem; padding: 0.8rem 0; display: flex; justify-content: flex-end;
   background: linear-gradient(180deg, rgba(248,250,252,0), #f8fafc 40%);
 }
+
+/* search + selection */
+.bulkbar__search {
+  margin-left: auto; padding: 0.45rem 0.7rem; border: 1px solid #c9d3ce; border-radius: 8px;
+  font: inherit; font-size: 0.85rem; min-width: 240px;
+  + .bulkbar__count { margin-left: 0.5rem; }
+}
+.selbar {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.8rem;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.55rem 0.9rem;
+  color: #1e3a8a; font-size: 0.85rem;
+}
+.link-btn { appearance: none; background: none; border: none; cursor: pointer; font: inherit; font-weight: 700; color: #1d4ed8; }
+.chk { width: 1%; text-align: center; input { width: 1rem; height: 1rem; cursor: pointer; } }
+.row--selected td { background: #eff6ff !important; }
+.nomatch { padding: 1rem; text-align: center; margin: 0; }
+.month-btn {
+  appearance: none; cursor: pointer; font: inherit; font-size: 0.7rem; font-weight: 700; margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid #d7dce3; background: #fff; color: #475467;
+  &:hover { border-color: #16a34a; color: #166534; }
+}
+
+/* monthly modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: flex;
+  align-items: center; justify-content: center; z-index: 50; padding: 1rem;
+}
+.modal {
+  background: #fff; border-radius: 14px; padding: 1.2rem; width: min(640px, 100%); max-height: 90vh;
+  overflow: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  h2 { margin: 0; font-size: 1.1rem; }
+  &__head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.8rem; }
+  &__month { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: #475467; margin-bottom: 0.9rem;
+    input { padding: 0.45rem 0.6rem; border: 1px solid #c9d3ce; border-radius: 8px; font: inherit; width: 180px; } }
+  &__list { border: 1px solid $line; border-radius: 10px; overflow: auto; max-height: 40vh; }
+}
+.att-cards--sm .att-card strong { font-size: 1.2rem; }

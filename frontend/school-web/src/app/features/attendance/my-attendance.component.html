@@ -5,16 +5,6 @@
       <h1>My Attendance</h1>
       <p class="muted">Your day-wise attendance record and overall summary.</p>
     </div>
-    @if (years().length) {
-      <label class="yearfilter">Academic year
-        <select [(ngModel)]="yearId">
-          <option [ngValue]="0">All years</option>
-          @for (y of years(); track y.academic_year_id) {
-            <option [ngValue]="y.academic_year_id">{{ y.name }}</option>
-          }
-        </select>
-      </label>
-    }
   </header>
 
   @if (state() === 'loading') {

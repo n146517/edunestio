@@ -265,6 +265,34 @@ export interface TimetableSlot {
   teacher_name: string | null;
   room: string | null;
 }
+/** One column of a class's day: a numbered period, or a Break / Lunch. */
+export type PeriodKind = 'Period' | 'Break' | 'Lunch';
+export interface PeriodScheduleItem {
+  seq?: number;
+  kind: PeriodKind;
+  label: string;
+  period_no?: number | null;
+  start_time: string;   // "HH:mm"
+  end_time: string;
+}
+export interface PeriodScheduleSaveResult { periods: number; rows: number; removed_slots: number; }
+/** A student's timetable: slots plus the class's period structure. */
+export interface MyTimetable { items: TimetableSlot[]; schedule: PeriodScheduleItem[]; }
+/** One thing a teacher teaches. */
+export interface TeacherSlot {
+  slot_id: number;
+  class_id: number;
+  class_name: string | null;
+  section_id: number | null;
+  section_name: string | null;
+  day_of_week: number;
+  period_no: number;
+  start_time: string | null;
+  end_time: string | null;
+  subject_name: string | null;
+  room: string | null;
+}
+export interface TeacherSchedule { teacher_id: number; teacher_name: string; items: TeacherSlot[]; }
 export interface TimetableSlotUpsert {
   SlotId?: number | null;
   ClassId: number;

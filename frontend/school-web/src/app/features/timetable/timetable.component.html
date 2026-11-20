@@ -7,65 +7,144 @@
     </div>
   </header>
 
-  <div class="selectors">
-    <label>Class
-      <select [(ngModel)]="classId" (change)="onClassChange()">
-        <option [ngValue]="0">Select…</option>
-        @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
-      </select>
-    </label>
-    <label>Section
-      <select [(ngModel)]="sectionId" (change)="onSectionChange()" [disabled]="!classId">
-        <option [ngValue]="0">All sections</option>
-        @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
-      </select>
-    </label>
-    @if (canManage && classId) { <span class="hint">Tip: click any cell to set / edit that period.</span> }
-  </div>
-
-  @if (!classId) {
-    <div class="empty"><p class="muted">Pick a class to view or build its timetable.</p></div>
-  } @else if (loading()) {
-    <p class="muted">Loading…</p>
-  } @else {
-    <div class="tt-wrap">
-      <table class="tt">
-        <thead>
-          <tr>
-            <th class="tt__corner">Day / Period</th>
-            @for (p of periods; track p) { <th>P{{ p }}</th> }
-          </tr>
-        </thead>
-        <tbody>
-          @for (d of days; track d.n) {
-            <tr>
-              <th class="tt__day">{{ d.label }}</th>
-              @for (p of periods; track p) {
-                <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, p)"
-                    [class.tt__cell--click]="canManage" (click)="openEditor(d.n, p)">
-                  @if (slotAt(d.n, p); as s) {
-                    <span class="tt__subject">{{ s.subject_name ?? 'Subject?' }}</span>
-                    <span class="tt__teacher">{{ s.teacher_name ?? '—' }}</span>
-                    @if (s.start_time) { <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span> }
-                    @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
-                  } @else {
-                    <span class="tt__empty">@if (canManage) { + }</span>
-                  }
-                </td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
+  @if (canManage) {
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" class="tab" [class.tab--on]="tab() === 'class'" (click)="tab.set('class')">Class timetable</button>
+      <button type="button" role="tab" class="tab" [class.tab--on]="tab() === 'teacher'" (click)="tab.set('teacher')">Teacher-wise</button>
     </div>
   }
+
+  @if (tab() === 'class') {
+    <div class="selectors">
+      <label>Class
+        <select [(ngModel)]="classId" (change)="onClassChange()">
+          <option [ngValue]="0">Select…</option>
+          @for (c of classes(); track c.class_id) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+        </select>
+      </label>
+      <label>Section
+        <select [(ngModel)]="sectionId" (change)="onSectionChange()" [disabled]="!classId">
+          <option [ngValue]="0">All sections</option>
+          @for (s of sections(); track s.section_id) { <option [ngValue]="s.section_id">{{ s.name }}</option> }
+        </select>
+      </label>
+      @if (canManage && classId) {
+        <button type="button" class="btn btn--outline" (click)="openScheduleEditor()">⚙ Edit periods &amp; breaks</button>
+        <span class="hint">Tip: click any period cell to set / edit it. Click a teacher's name to see where they teach.</span>
+      }
+    </div>
+
+    @if (!classId) {
+      <div class="empty"><p class="muted">Pick a class to view or build its timetable.</p></div>
+    } @else if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else {
+      @if (!hasSchedule()) {
+        <div class="notice">
+          This class has no period structure yet, so a default P1–P8 grid is shown.
+          @if (canManage) { <button type="button" class="link-btn" (click)="openScheduleEditor()">Set periods, break &amp; lunch</button> }
+        </div>
+      }
+      <div class="tt-wrap">
+        <table class="tt">
+          <thead>
+            <tr>
+              <th class="tt__corner">Day / Period</th>
+              @for (c of columns(); track $index) {
+                <th [class.tt__th--gap]="c.kind !== 'Period'">
+                  {{ c.label }}
+                  @if (colTime(c)) { <span class="tt__thtime">{{ colTime(c) }}</span> }
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of days; track d.n) {
+              <tr>
+                <th class="tt__day">{{ d.label }}</th>
+                @for (c of columns(); track $index) {
+                  @if (c.kind !== 'Period') {
+                    <td class="tt__cell tt__cell--gap" [attr.aria-label]="c.label"><span>{{ c.label }}</span></td>
+                  } @else {
+                    <td class="tt__cell" [class.tt__cell--filled]="slotAt(d.n, c.period_no)"
+                        [class.tt__cell--click]="canManage" (click)="openEditor(d.n, c)">
+                      @if (slotAt(d.n, c.period_no); as s) {
+                        <span class="tt__subject">{{ s.subject_name ?? 'Subject?' }}</span>
+                        @if (canManage && s.teacher_id) {
+                          <button type="button" class="tt__teacher tt__teacher--link"
+                                  (click)="openTeacher(s.teacher_id, $event)" title="See where this teacher teaches">{{ s.teacher_name }}</button>
+                        } @else {
+                          <span class="tt__teacher">{{ s.teacher_name ?? '—' }}</span>
+                        }
+                        @if (!colTime(c) && s.start_time) {
+                          <span class="tt__time">{{ s.start_time.substring(0,5) }}@if (s.end_time) {–{{ s.end_time.substring(0,5) }}}</span>
+                        }
+                        @if (s.room) { <span class="tt__room">🚪 {{ s.room }}</span> }
+                      } @else {
+                        <span class="tt__empty">@if (canManage) { + }</span>
+                      }
+                    </td>
+                  }
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    <!-- Teacher-wise view -->
+    <div class="selectors">
+      <label>Teacher
+        <select [(ngModel)]="teacherViewId" (change)="loadTeacherView()">
+          <option [ngValue]="0">Select…</option>
+          @for (t of teachers(); track t.user_id) { <option [ngValue]="t.user_id">{{ t.full_name }}</option> }
+        </select>
+      </label>
+      <span class="hint">See every class, day and time a teacher is teaching.</span>
+    </div>
+    @if (!teacherViewId) {
+      <div class="empty"><p class="muted">Pick a teacher to see their weekly schedule.</p></div>
+    } @else if (teacherViewLoading()) {
+      <p class="muted">Loading…</p>
+    } @else if (teacherView(); as tv) {
+      <div class="card">
+        <ng-container *ngTemplateOutlet="teacherTpl; context: { $implicit: tv }" />
+      </div>
+    }
+  }
 </section>
+
+<!-- Reusable: a teacher's schedule grouped by day -->
+<ng-template #teacherTpl let-t>
+  <h3 class="tsch__name">{{ t.teacher_name }}</h3>
+  <p class="muted">{{ t.items.length }} period{{ t.items.length === 1 ? '' : 's' }} per week</p>
+  @if (!t.items.length) {
+    <p class="muted">Not assigned to any class yet.</p>
+  } @else {
+    @for (g of byDay(t); track g.label) {
+      <h4 class="tsch__day">{{ g.label }}</h4>
+      <ul class="tsch__list">
+        @for (i of g.items; track i.slot_id) {
+          <li>
+            <span class="tsch__time">{{ i.start_time && i.end_time ? i.start_time + '–' + i.end_time : 'P' + i.period_no }}</span>
+            <span class="tsch__where">Class {{ i.class_name }}{{ i.section_name ? ' ' + i.section_name : ' (all sections)' }}</span>
+            @if (i.subject_name) { <span class="tsch__sub">{{ i.subject_name }}</span> }
+            @if (i.room) { <span class="tsch__room">🚪 {{ i.room }}</span> }
+          </li>
+        }
+      </ul>
+    }
+  }
+</ng-template>
 
 <!-- Slot editor -->
 @if (editorOpen()) {
   <div class="modal-backdrop" (click)="closeEditor()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <h2>Period {{ editPeriod }} · {{ days[editDay - 1].label }}</h2>
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <h2>{{ editCol()?.label }} · {{ dayLabel(editDay()) }}
+        @if (editCol(); as c) { @if (colTime(c)) { <small class="modal__sub">{{ colTime(c) }}</small> } }
+      </h2>
       <label>Subject
         <select [(ngModel)]="formSubjectId" name="subj">
           <option [ngValue]="0">—</option>
@@ -73,21 +152,133 @@
         </select>
       </label>
       <label>Teacher
-        <select [(ngModel)]="formTeacherId" name="tch">
+        <select [ngModel]="formTeacherId()" (ngModelChange)="onTeacherPick($event)" name="tch">
           <option [ngValue]="0">—</option>
           @for (t of teachers(); track t.user_id) { <option [ngValue]="t.user_id">{{ t.full_name }}</option> }
         </select>
       </label>
-      <div class="row2">
-        <label>Start time <input type="time" [(ngModel)]="formStart" name="st" /></label>
-        <label>End time <input type="time" [(ngModel)]="formEnd" name="et" /></label>
-      </div>
+      @if (formTeacherId()) {
+        <button type="button" class="link-btn link-btn--block" (click)="openTeacher(formTeacherId())">
+          👁 See where this teacher teaches
+        </button>
+        @if (clashes().length) {
+          <div class="warnbox" role="alert">
+            <strong>Already teaching at this time:</strong>
+            <ul>@for (c of clashes(); track c) { <li>{{ c }}</li> }</ul>
+            Saving will be blocked. Pick another teacher or time.
+          </div>
+        }
+      }
       <label>Room (optional) <input type="text" [(ngModel)]="formRoom" name="rm" placeholder="e.g. 204" /></label>
       <div class="modal__actions">
         @if (editSlotId) { <button class="btn btn--danger-outline" (click)="deleteSlot()" [disabled]="busy()">Clear</button> }
         <span class="spacer"></span>
         <button class="btn btn--ghost" (click)="closeEditor()">Cancel</button>
         <button class="btn btn--primary" (click)="saveSlot()" [disabled]="busy()">{{ busy() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Teacher schedule popup -->
+@if (teacherPopup() || teacherPopupLoading()) {
+  <div class="modal-backdrop modal-backdrop--top" (click)="closeTeacherPopup()">
+    <div class="modal modal--wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <h2>Teacher schedule</h2>
+        <button type="button" class="link-btn" (click)="closeTeacherPopup()" aria-label="Close">✕</button>
+      </div>
+      @if (teacherPopupLoading()) {
+        <p class="muted">Loading…</p>
+      } @else if (teacherPopup(); as tp) {
+        <div class="modal__scroll">
+          <ng-container *ngTemplateOutlet="teacherTpl; context: { $implicit: tp }" />
+        </div>
+      }
+      <div class="modal__actions">
+        <span class="spacer"></span>
+        <button class="btn btn--primary" (click)="closeTeacherPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Period structure editor -->
+@if (scheduleOpen()) {
+  <div class="modal-backdrop" (click)="closeScheduleEditor()">
+    <div class="modal modal--wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal__head">
+        <h2>Periods, break &amp; lunch · Class {{ className() }}</h2>
+        <button type="button" class="link-btn" (click)="closeScheduleEditor()" aria-label="Close">✕</button>
+      </div>
+      <p class="muted">Build this class's day in time order. {{ periodCount() }} period{{ periodCount() === 1 ? '' : 's' }}.</p>
+
+      <div class="copyrow">
+        <label>Copy structure from
+          <select [(ngModel)]="copyFromClassId" name="copyFrom">
+            <option [ngValue]="0">Choose class…</option>
+            @for (c of classes(); track c.class_id) {
+              @if (c.class_id !== classId) { <option [ngValue]="c.class_id">{{ c.name }}</option> }
+            }
+          </select>
+        </label>
+        <button type="button" class="btn btn--outline" (click)="copyFromClass()" [disabled]="!copyFromClassId">Copy</button>
+        <button type="button" class="btn btn--outline" (click)="loadSample()">Use sample day</button>
+      </div>
+
+      <div class="sched modal__scroll">
+        @for (r of rows(); track $index; let i = $index) {
+          <div class="sched__row" [class.sched__row--gap]="r.kind !== 'Period'">
+            <span class="sched__type sched__type--{{ r.kind.toLowerCase() }}">{{ r.kind }}</span>
+            @if (r.kind === 'Period') {
+              <span class="sched__label">Period {{ periodNumber(i) }}</span>
+            } @else {
+              <input type="text" class="sched__input" [ngModel]="r.label" (ngModelChange)="updateRow(i, { label: $event })"
+                     maxlength="40" aria-label="Label" />
+            }
+            <input type="time" class="sched__time" [ngModel]="r.start_time" (ngModelChange)="updateRow(i, { start_time: $event })" aria-label="Start time" />
+            <span class="sched__to">to</span>
+            <input type="time" class="sched__time" [ngModel]="r.end_time" (ngModelChange)="updateRow(i, { end_time: $event })" aria-label="End time" />
+            <span class="sched__ops">
+              <button type="button" class="icon-btn" (click)="moveRow(i, -1)" [disabled]="i === 0" aria-label="Move up">↑</button>
+              <button type="button" class="icon-btn" (click)="moveRow(i, 1)" [disabled]="i === rows().length - 1" aria-label="Move down">↓</button>
+              <button type="button" class="icon-btn icon-btn--del" (click)="removeRow(i)" aria-label="Remove">✕</button>
+            </span>
+          </div>
+        }
+      </div>
+
+      <div class="addrow">
+        <button type="button" class="btn btn--outline" (click)="addRow('Period')">+ Period</button>
+        <button type="button" class="btn btn--outline" (click)="addRow('Break')">+ Break</button>
+        <button type="button" class="btn btn--outline" (click)="addRow('Lunch')">+ Lunch</button>
+      </div>
+
+      <p class="muted small">Saving updates this class's grid. Timetable entries of periods you remove are cleared.</p>
+      @if (scheduleError()) { <p class="error" role="alert">{{ scheduleError() }}</p> }
+
+      <div class="modal__actions">
+        <span class="spacer"></span>
+        <button class="btn btn--ghost" (click)="closeScheduleEditor()">Cancel</button>
+        <button class="btn btn--primary" (click)="saveSchedule()" [disabled]="scheduleBusy()">{{ scheduleBusy() ? 'Saving…' : 'Save structure' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Result popup (added / updated / cleared / clash) -->
+@if (result(); as r) {
+  <div class="modal-backdrop modal-backdrop--top" (click)="closeResult()">
+    <div class="modal modal--result" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
+      <div class="result__icon result__icon--{{ r.kind }}" aria-hidden="true">{{ r.kind === 'success' ? '✓' : (r.kind === 'error' ? '!' : 'i') }}</div>
+      <h2 class="result__title">{{ r.title }}</h2>
+      <p class="result__msg">{{ r.message }}</p>
+      @if (r.lines.length) {
+        <ul class="result__list">@for (l of r.lines; track l) { <li>{{ l }}</li> }</ul>
+      }
+      <div class="modal__actions">
+        <span class="spacer"></span>
+        <button class="btn btn--primary" (click)="closeResult()">OK</button>
       </div>
     </div>
   </div>

@@ -69,3 +69,111 @@ $shadow: 0 1px 3px rgba(16,24,40,0.08), 0 1px 2px rgba(16,24,40,0.04);
   &--danger-outline { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
   &:disabled { opacity: 0.6; cursor: default; }
 }
+
+/* ---- tabs, notices, small helpers ---- */
+.tabs { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
+.tab {
+  appearance: none; cursor: pointer; font: inherit; font-weight: 700; font-size: 0.85rem;
+  padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid $line; background: #fff; color: #475467;
+  &--on { background: #0f5132; border-color: #0f5132; color: #fff; }
+}
+.notice {
+  background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 12px;
+  padding: 0.6rem 0.9rem; margin-bottom: 0.8rem; font-size: 0.85rem;
+}
+.card { background: #fff; border: 1px solid $line; border-radius: 14px; padding: 1rem 1.2rem; box-shadow: $shadow; }
+.small { font-size: 0.78rem; }
+.error { color: #b3261e; font-size: 0.85rem; }
+.link-btn {
+  appearance: none; background: none; border: none; cursor: pointer; font: inherit; font-weight: 700;
+  color: #1d4ed8; padding: 0; margin-left: 0.4rem;
+  &--block { display: block; margin: -0.3rem 0 0.8rem; font-size: 0.8rem; }
+}
+.btn--outline { color: #166534; border-color: #a7f3d0; background: #f0fdf4; }
+
+/* ---- grid: break / lunch columns, clickable teacher ---- */
+.tt__thtime { display: block; font-size: 0.66rem; font-weight: 600; opacity: 0.85; text-transform: none; letter-spacing: 0; }
+.tt thead .tt__th--gap { background: #475467; }
+.tt__cell--gap {
+  background: repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 8px, #eceef2 8px, #eceef2 16px);
+  text-align: center; vertical-align: middle; color: $muted; font-size: 0.72rem; font-weight: 700; cursor: default;
+  span { writing-mode: vertical-rl; transform: rotate(180deg); display: inline-block; }
+}
+.tt__teacher--link {
+  appearance: none; background: none; border: none; padding: 0; cursor: pointer; font: inherit;
+  font-size: 0.74rem; color: #1d4ed8; text-align: left; text-decoration: underline dotted;
+  &:hover { text-decoration: underline; }
+}
+
+/* ---- modals: wide, top-layer, header, scroll ---- */
+.modal-backdrop--top { z-index: 1100; }
+.modal--wide { max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; }
+.modal__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; h2 { margin: 0 0 0.6rem; } }
+.modal__scroll { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+.modal__sub { display: block; font-size: 0.78rem; font-weight: 600; color: $muted; margin-top: 0.15rem; }
+
+.warnbox {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 10px;
+  padding: 0.6rem 0.8rem; font-size: 0.82rem; margin-bottom: 0.8rem;
+  ul { margin: 0.3rem 0; padding-left: 1.1rem; }
+}
+
+/* ---- teacher schedule list ---- */
+.tsch__name { margin: 0; font-size: 1.05rem; }
+.tsch__day { margin: 0.9rem 0 0.3rem; font-size: 0.82rem; color: #0f5132; text-transform: uppercase; letter-spacing: 0.04em; }
+.tsch__list {
+  list-style: none; margin: 0; padding: 0; border: 1px solid $line-soft; border-radius: 10px; overflow: hidden;
+  li { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid $line-soft; font-size: 0.85rem;
+    &:last-child { border-bottom: none; } }
+}
+.tsch__time { font-weight: 700; color: #166534; min-width: 90px; }
+.tsch__where { font-weight: 600; }
+.tsch__sub { color: #475467; }
+.tsch__room { color: $muted; }
+
+/* ---- period structure editor ---- */
+.copyrow {
+  display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end; margin: 0.4rem 0 0.8rem;
+  label { margin: 0; }
+  select { min-width: 160px; }
+}
+.sched { border: 1px solid $line-soft; border-radius: 10px; padding: 0.3rem; max-height: 42vh; }
+.sched__row {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.4rem; border-radius: 8px; flex-wrap: wrap;
+  &--gap { background: #f3f4f6; }
+  input { margin: 0; width: auto; }
+}
+.sched__type {
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 999px; min-width: 56px; text-align: center;
+  &--period { background: #dcfce7; color: #166534; }
+  &--break { background: #fef3c7; color: #92400e; }
+  &--lunch { background: #dbeafe; color: #1d4ed8; }
+}
+.sched__label { font-weight: 700; min-width: 110px; font-size: 0.85rem; }
+.sched__input { width: 110px !important; min-width: 110px; }
+.sched__time { width: 110px !important; }
+.sched__to { color: $muted; font-size: 0.8rem; }
+.sched__ops { margin-left: auto; display: inline-flex; gap: 0.25rem; }
+.icon-btn {
+  appearance: none; cursor: pointer; border: 1px solid $line; background: #fff; border-radius: 7px;
+  width: 28px; height: 28px; font: inherit; font-weight: 700; color: #475467;
+  &:disabled { opacity: 0.4; cursor: default; }
+  &--del { color: #dc2626; border-color: #fecaca; }
+}
+.addrow { display: flex; gap: 0.5rem; margin: 0.7rem 0 0.4rem; }
+
+/* ---- result popup ---- */
+.modal--result { max-width: 440px; text-align: center; }
+.result__icon {
+  width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 0.6rem; display: flex; align-items: center;
+  justify-content: center; font-size: 1.5rem; font-weight: 800; color: #fff;
+  &--success { background: $green; }
+  &--error { background: #dc2626; }
+  &--info { background: #2563eb; }
+}
+.result__title { margin: 0 0 0.4rem !important; font-size: 1.15rem !important; }
+.result__msg { margin: 0 0 0.6rem; color: #475467; font-size: 0.9rem; }
+.result__list {
+  text-align: left; margin: 0 0 0.8rem; padding: 0.6rem 0.9rem 0.6rem 1.7rem; background: #f8fafc;
+  border: 1px solid $line-soft; border-radius: 10px; font-size: 0.85rem; max-height: 30vh; overflow: auto;
+}

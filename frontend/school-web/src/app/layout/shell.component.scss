@@ -1,9 +1,14 @@
 .shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  // Fill the visible window: header + sidebar stay put, only content scrolls.
+  // body is zoomed (--app-zoom) but vh is not, so divide by the zoom to compensate.
+  height: calc(100vh / var(--app-zoom, 1));
+  height: calc(100dvh / var(--app-zoom, 1));
+  overflow: hidden;
 
   &__header {
+    flex: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -61,6 +66,7 @@
   &__body {
     display: flex;
     flex: 1;
+    min-height: 0;            // let the children scroll inside instead of growing the page
     position: relative;
   }
 
@@ -70,6 +76,7 @@
 
   &__nav {
     width: 256px;
+    flex: none;
     background: #ffffff;
     border-right: 1px solid #e5e9e6;
     padding: 0.5rem 0;
@@ -86,6 +93,7 @@
     flex: 1;
     padding: 1.5rem 2rem;
     min-width: 0;             // allow content (tables) to shrink instead of overflow
+    overflow-y: auto;         // the page content scrolls on its own
   }
 }
 

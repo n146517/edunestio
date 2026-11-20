@@ -21,6 +21,24 @@ public sealed class TimetableController : BaseApiController
     [RequirePermission(Permissions.TimetableManage, Permissions.AssignmentManage)]
     public ActionResult Teachers() => Map(_bl.Teachers(CurrentUser.TenantId));
 
+    /// <summary>Period / break / lunch structure of one class.</summary>
+    [HttpGet("schedule")]
+    [RequirePermission(Permissions.TimetableView, Permissions.TimetableManage)]
+    public ActionResult ScheduleGet([FromQuery] long classId)
+        => Map(_bl.ScheduleGet(CurrentUser.TenantId, classId));
+
+    /// <summary>Replace the period structure of a class (principal / admin).</summary>
+    [HttpPut("schedule")]
+    [RequirePermission(Permissions.TimetableManage)]
+    public ActionResult ScheduleSave([FromBody] PeriodScheduleVO vo)
+        => Map(_bl.ScheduleSave(CurrentUser.TenantId, vo));
+
+    /// <summary>Everything one teacher teaches (class, day, time).</summary>
+    [HttpGet("teacher/{teacherId:long}")]
+    [RequirePermission(Permissions.TimetableManage)]
+    public ActionResult TeacherSchedule(long teacherId)
+        => Map(_bl.TeacherSchedule(CurrentUser.TenantId, teacherId));
+
     /// <summary>Slots for a class (optionally a section).</summary>
     [HttpGet]
     [RequirePermission(Permissions.TimetableView, Permissions.TimetableManage)]

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { AssignmentService } from '../../core/services/assignment.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AcademicYearStore } from '../../core/state/academic-year.store';
 import { StudentAssignment } from '../../core/models/api.models';
 
 type LoadState = 'loading' | 'success' | 'error';
@@ -19,7 +20,22 @@ export class MyAssignmentsComponent {
   private readonly notify = inject(NotificationService);
 
   protected readonly state = signal<LoadState>('loading');
-  protected readonly items = signal<StudentAssignment[]>([]);
+  private readonly allItems = signal<StudentAssignment[]>([]);
+  private readonly yearStore = inject(AcademicYearStore);
+
+  /** Assignments scoped to the header-selected academic year (by due date). */
+  protected readonly items = computed(() => {
+    const all = this.allItems();
+    const y = this.yearStore.selected();
+    if (!y) return all;
+    const from = y.start_date?.substring(0, 10) ?? '';
+    const to = y.end_date?.substring(0, 10) ?? '';
+    return all.filter((a) => {
+      if (!a.due_date) return true;
+      const d = a.due_date.substring(0, 10);
+      return (!from || d >= from) && (!to || d <= to);
+    });
+  });
 
   protected readonly pendingCount = computed(() =>
     this.items().filter((a) => !a.submission_id).length
@@ -36,7 +52,7 @@ export class MyAssignmentsComponent {
   protected load(): void {
     this.state.set('loading');
     this.api.mine().subscribe({
-      next: (a) => { this.items.set(a); this.state.set('success'); },
+      next: (a) => { this.allItems.set(a); this.state.set('success'); },
       error: () => this.state.set('error')
     });
   }

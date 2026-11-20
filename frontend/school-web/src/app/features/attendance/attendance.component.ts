@@ -6,7 +6,7 @@ import { AcademicService } from '../../core/services/academic.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { NotificationService } from '../../core/services/notification.service';
-import { AttendanceSheetRow, AttendanceStatus, SchoolClass, Section, Subject } from '../../core/models/api.models';
+import { AttendanceHistoryRow, AttendanceSheetRow, AttendanceStatus, SchoolClass, Section, Subject } from '../../core/models/api.models';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -53,6 +53,86 @@ export class AttendanceComponent {
 
   protected readonly isSubjectMode = computed(() => this.mode() === 'Subject');
 
+  // ---- Search + multi-select ----
+  protected readonly search = signal('');
+  /** Student ids ticked for a bulk action. */
+  protected readonly selected = signal<Set<number>>(new Set<number>());
+
+  /** Rows matching the search box (name, roll number or admission number). */
+  protected readonly visibleRows = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    if (!q) return this.rows();
+    return this.rows().filter((r) =>
+      `${r.first_name} ${r.last_name}`.toLowerCase().includes(q) ||
+      (r.roll_number ?? '').toString().toLowerCase().includes(q) ||
+      (r.admission_number ?? '').toLowerCase().includes(q));
+  });
+
+  /** Selectable (not leave-locked) visible rows. */
+  private readonly selectableVisible = computed(() => this.visibleRows().filter((r) => !r.on_leave));
+  protected readonly selectedCount = computed(() => this.selected().size);
+  protected readonly allVisibleSelected = computed(() => {
+    const sel = this.selected();
+    const list = this.selectableVisible();
+    return list.length > 0 && list.every((r) => sel.has(r.student_id));
+  });
+
+  protected toggleOne(row: AttendanceSheetRow): void {
+    if (row.on_leave) return;
+    const next = new Set(this.selected());
+    if (next.has(row.student_id)) next.delete(row.student_id); else next.add(row.student_id);
+    this.selected.set(next);
+  }
+
+  protected toggleAllVisible(): void {
+    const next = new Set(this.selected());
+    if (this.allVisibleSelected()) this.selectableVisible().forEach((r) => next.delete(r.student_id));
+    else this.selectableVisible().forEach((r) => next.add(r.student_id));
+    this.selected.set(next);
+  }
+
+  protected clearSelection(): void { this.selected.set(new Set<number>()); }
+
+  protected markSelected(status: AttendanceStatus): void {
+    const sel = this.selected();
+    this.rows.update((list) => list.map((r) => (sel.has(r.student_id) && !r.on_leave ? { ...r, status } : r)));
+  }
+
+  // ---- Monthly view for one student ----
+  protected readonly monthOpen = signal(false);
+  protected readonly monthStudent = signal<AttendanceSheetRow | null>(null);
+  protected readonly monthLoading = signal(false);
+  private readonly monthAll = signal<AttendanceHistoryRow[]>([]);
+  protected readonly month = signal(new Date().toISOString().slice(0, 7)); // yyyy-MM
+
+  protected readonly monthRows = computed(() =>
+    this.monthAll().filter((r) => r.attend_date.substring(0, 7) === this.month())
+      .sort((a, b) => a.attend_date.localeCompare(b.attend_date)));
+
+  protected readonly monthSummary = computed(() => {
+    const by: Record<string, number> = { Present: 0, Absent: 0, Late: 0, Leave: 0 };
+    const rows = this.monthRows();
+    for (const r of rows) by[r.status] = (by[r.status] ?? 0) + 1;
+    const total = rows.length;
+    return { total, present: by['Present'], absent: by['Absent'], late: by['Late'], leave: by['Leave'],
+      pct: total ? Math.round((by['Present'] / total) * 100) : 0 };
+  });
+
+  protected openMonth(row: AttendanceSheetRow): void {
+    this.monthStudent.set(row);
+    this.month.set(this.date.slice(0, 7));
+    this.monthAll.set([]);
+    this.monthOpen.set(true);
+    this.monthLoading.set(true);
+    // Wide window so any month of the year is available.
+    this.api.history(row.student_id, 800).subscribe({
+      next: (h) => { this.monthAll.set(h); this.monthLoading.set(false); },
+      error: () => this.monthLoading.set(false)
+    });
+  }
+
+  protected closeMonth(): void { this.monthOpen.set(false); }
+
   /** True when at least one row already has a saved attendance record for this date. */
   protected readonly alreadyMarked = computed(() => this.rows().some((r) => r.marked));
   /** How many of the loaded students already have a record saved. */
@@ -87,6 +167,7 @@ export class AttendanceComponent {
     if (!this.classId) { this.notify.info('Select a class first.'); return; }
     if (this.isSubjectMode() && !this.subjectId) { this.notify.info('Select a subject.'); return; }
     this.state.set('loading');
+    this.selected.set(new Set<number>());
     this.api.sheet(this.classId, this.date, this.sectionId || undefined,
       this.isSubjectMode() ? (this.subjectId || undefined) : undefined).subscribe({
       next: (s) => { this.rows.set(s?.items ?? []); this.state.set('success'); },
